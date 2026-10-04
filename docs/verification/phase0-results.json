@@ -1,0 +1,70 @@
+{
+  "checkedAt": "2026-10-04T10:50:42.411Z",
+  "server": "http://127.0.0.1:39281",
+  "model": "taskflow-local",
+  "schemaCanary": {
+    "passed": true,
+    "elapsedMs": 1671,
+    "expected": {
+      "proof": "required"
+    },
+    "actual": {
+      "proof": "required"
+    }
+  },
+  "syntheticTasks": 25,
+  "results": [
+    {
+      "id": "create-gym",
+      "passed": true,
+      "elapsedMs": 13463,
+      "action": {
+        "action": "create",
+        "title": "gym",
+        "scheduled_at_local": "2026-10-05T07:00:00",
+        "duration_minutes": 60
+      }
+    },
+    {
+      "id": "files-done",
+      "passed": true,
+      "elapsedMs": 23470,
+      "action": {
+        "action": "set_status",
+        "task_ref": 6,
+        "status": "done"
+      }
+    },
+    {
+      "id": "move-gym",
+      "passed": true,
+      "elapsedMs": 5888,
+      "action": {
+        "action": "update",
+        "task_ref": 1,
+        "scheduled_at_local": "2026-10-05T09:00:00"
+      }
+    },
+    {
+      "id": "report-unread",
+      "passed": true,
+      "elapsedMs": 4461,
+      "action": {
+        "action": "set_read",
+        "task_ref": 11,
+        "is_read": false
+      }
+    },
+    {
+      "id": "tonight-query",
+      "passed": true,
+      "elapsedMs": 6510,
+      "action": {
+        "action": "query",
+        "kind": "range",
+        "from_local": "2026-10-04T18:00:00",
+        "to_local": "2026-10-05T00:00:00"
+      }
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+:root {
+  /* Literal visual values from the original Taskflow styles; no implementation copied. */
+  --tf-bg: #f5f5f4;
+  --tf-surface: #ffffff;
+  --tf-fg: #000000;
+  --tf-muted: #717182;
+  --tf-soft: #e5e5e5;
+  --tf-accent: #f97316;
+  --tf-danger: #d4183d;
+  --tf-font: "Inter", "Segoe UI", system-ui, sans-serif;
+  --tf-mono: "JetBrains Mono", Consolas, monospace;
+  --tf-border: 2px;
+  --tf-radius: 0;
+  --tf-shadow: 2px 2px 0 #000000;
+  --tf-rule: 4px;
+  --tf-space-1: 4px;
+  --tf-space-2: 8px;
+  --tf-space-3: 12px;
+  --tf-space-4: 16px;
+  --tf-space-5: 24px;
+  --tf-space-6: 32px;
+  --tf-fast: 140ms;
+  --tf-text-xs: 0.75rem;
+  --tf-text-sm: 0.875rem;
+  --tf-text-base: 1rem;
+  --tf-text-lg: 1.125rem;
+  --tf-text-xl: 1.5rem;
+  --tf-leading: 1.5;
+  --tf-weight-normal: 400;
+  --tf-weight-medium: 500;
+  --tf-weight-bold: 700;
+  --tf-tracking: 0.08em;
+  --tf-disabled-opacity: 0.5;
+  --tf-done-opacity: 0.65;
+  --tf-time-column: 4.5rem;
+  --tf-window-width: 760px;
+  --tf-control-height: 36px;
+}

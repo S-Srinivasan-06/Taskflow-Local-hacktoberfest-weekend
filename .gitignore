@@ -1,0 +1,15 @@
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+# The icon generator emits other platforms too; only Windows assets are needed.
+src-tauri/icons/*
+!src-tauri/icons/icon.png
+!src-tauri/icons/icon.ico
+tests/artifacts/
+src-tauri/runtime/llama/
+models/
+*.gguf
+*.db
+*.db-shm
+*.db-wal

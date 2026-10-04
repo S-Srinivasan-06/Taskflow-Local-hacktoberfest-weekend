@@ -1,0 +1,6 @@
+{
+  "identifier": "main-window",
+  "description": "Local task database access for the main window",
+  "windows": ["main"],
+  "permissions": ["core:default", "sql:default", "sql:allow-execute"]
+}
