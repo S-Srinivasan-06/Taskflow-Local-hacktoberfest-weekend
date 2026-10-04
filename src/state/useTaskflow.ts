@@ -14,26 +14,29 @@ export function useTaskflow() {
   const [error, setError] = useState<string | null>(null);
   const commandRunning = useRef(false);
   const mounted = useRef(false);
+  const reloadPending = useRef(false);
+  const readVersion = useRef(0);
 
   const reload = useCallback(async () => {
-    if (commandRunning.current) return;
+    if (commandRunning.current) { reloadPending.current = true; return; }
+    const version = ++readVersion.current;
     setLoading(true);
     setError(null);
     try {
       await bootstrap();
       const rows = await listTimelineTasks();
-      if (mounted.current) {
+      if (mounted.current && version === readVersion.current) {
         setTasks(rows);
         setReady(true);
         setLoaded(true);
       }
     } catch {
-      if (mounted.current) {
+      if (mounted.current && version === readVersion.current) {
         setReady(false);
         setError('Your tasks could not be loaded. Try again.');
       }
     } finally {
-      if (mounted.current) setLoading(false);
+      if (mounted.current && version === readVersion.current) setLoading(false);
     }
   }, []);
 
@@ -47,6 +50,8 @@ export function useTaskflow() {
     // A synchronous lock also stops double clicks before React disables controls.
     if (!ready || commandRunning.current) return false;
     commandRunning.current = true;
+    ++readVersion.current;
+    setLoading(false);
     setSaving(true);
     setError(null);
     let written = false;
@@ -70,8 +75,12 @@ export function useTaskflow() {
     } finally {
       commandRunning.current = false;
       if (mounted.current) setSaving(false);
+      if (reloadPending.current) {
+        reloadPending.current = false;
+        if (mounted.current) void reload();
+      }
     }
-  }, [ready]);
+  }, [ready, reload]);
 
   return { tasks, loading, ready, loaded, saving, error, reload, runCommand };
 }

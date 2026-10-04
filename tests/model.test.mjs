@@ -43,6 +43,16 @@ test('valid actions become commands with task ids only after numbered reference 
   }
 });
 
+test('image requests remain proposals and invalid image data never reaches the model', async () => {
+  const { service, requests } = fixture([{ action: 'create', title: 'Appointment', scheduled_at_local: '2026-10-05T10:00:00' }]);
+  const image = 'data:image/png;base64,AQID';
+  const result = await service.interpretUserRequest('Create from screenshot', { tasks: [], now, image });
+  assert.equal(result.kind, 'proposal');
+  assert.equal(requests[0].messages[1].image, image);
+  assert.equal((await service.interpretUserRequest('Create', { tasks: [], now, image: 'https://example.com/private.png' })).kind, 'error');
+  assert.equal(requests.length, 1);
+});
+
 test('query returns exactly repository rows and a validated UTC query, never generated answers', async () => {
   const rows = [task(9, 'Actual database title')];
   let query;

@@ -2,5 +2,9 @@
   "identifier": "main-window",
   "description": "Local task database access for the main window",
   "windows": ["main"],
-  "permissions": ["core:default", "sql:default", "sql:allow-execute"]
+  "permissions": ["core:default", "sql:default", "sql:allow-execute", "notification:default",
+    { "identifier": "http:default", "allow": [
+      { "url": "http://127.0.0.1:39281/*" }, { "url": "http://127.0.0.1:11434/api/*" }
+    ] }
+  ]
 }

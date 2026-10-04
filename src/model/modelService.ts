@@ -12,7 +12,7 @@ export type Interpretation =
   | { kind: 'query'; tasks: Task[] }
   | { kind: 'clarification'; question: string; choices: Task[] }
   | { kind: 'error'; message: string };
-export interface InterpretOptions { tasks: Task[]; now?: Date; selectedTaskId?: string }
+export interface InterpretOptions { tasks: Task[]; now?: Date; selectedTaskId?: string; image?: string }
 export const SAFE_INTERPRETATION_ERROR = "I couldn't interpret that safely. Try saying it another way.";
 
 function toCommand(action: Exclude<ModelAction, { action: 'query' | 'clarify' }>, task?: Task): TaskCommand | null {
@@ -42,25 +42,30 @@ export function createModelService(dependencies: { client: LlamaClient; queryTas
     async interpretUserRequest(text: string, options: InterpretOptions): Promise<Interpretation> {
       if (busy) return { kind: 'error', message: 'A request is already running.' };
       if (!text.trim()) return { kind: 'clarification', question: 'What would you like to do?', choices: [] };
+      if (options.image && (!/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(options.image) || options.image.length > 7_000_000)) {
+        return { kind: 'error', message: 'Choose a PNG or JPEG image smaller than 5 MB.' };
+      }
       busy = true;
       try {
         const context = buildContext(options.tasks, options.now, options.selectedTaskId);
         if (options.selectedTaskId && !context.tasks.length) return { kind: 'error', message: 'Task not found.' };
         // Rough prompt budget: three characters per token. Remove distant tasks first.
         let prompt = buildPrompt(context);
-        while (context.tasks.length && prompt.length + text.length > 9000) {
+        const promptBudget = options.image ? 5500 : 9000;
+        while (context.tasks.length && prompt.length + text.length > promptBudget) {
           const farthest = context.tasks.reduce((index, task, candidate) =>
             Math.abs(Date.parse(task.scheduledAtUtc) - context.now.getTime()) >
             Math.abs(Date.parse(context.tasks[index].scheduledAtUtc) - context.now.getTime()) ? candidate : index, 0);
           context.tasks.splice(farthest, 1);
           prompt = buildPrompt(context);
         }
-        if (prompt.length + text.length > 9000) return { kind: 'error', message: 'Please use a shorter request.' };
+        if (prompt.length + text.length > promptBudget) return { kind: 'error', message: 'Please use a shorter request.' };
+        if (options.selectedTaskId && !context.tasks.length) return { kind: 'error', message: 'That task is too long for a language request. Use Edit instead.' };
         const schema = buildActionSchema(context.tasks.length);
         let action: ModelAction | undefined;
         for (let attempt = 0; attempt < 2; attempt++) {
           const content = await dependencies.client.complete({
-            messages: [{ role: 'system', content: prompt }, { role: 'user', content: text + (attempt ? '\nReturn a valid action using only the listed task numbers and real local dates. Include all required fields.' : '') }],
+            messages: [{ role: 'system', content: prompt }, { role: 'user', content: text + (attempt ? '\nReturn a valid action using only the listed task numbers and real local dates. Include all required fields.' : ''), ...(options.image ? { image: options.image } : {}) }],
             response_format: { type: 'json_schema', json_schema: { name: 'taskflow_action', strict: true, schema: buildActionJsonSchema(context.tasks.length) } },
             chat_template_kwargs: { enable_thinking: false }, temperature: 0, max_tokens: 256,
           });

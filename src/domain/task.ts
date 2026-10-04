@@ -18,10 +18,12 @@ export interface CreateTaskInput {
   title: string;
   scheduledAtUtc: string;
   durationMinutes?: number | null;
+  reminderAtUtc?: string | null;
 }
 
 export interface UpdateTaskInput {
   title?: string;
   scheduledAtUtc?: string;
   durationMinutes?: number | null;
+  reminderAtUtc?: string | null;
 }

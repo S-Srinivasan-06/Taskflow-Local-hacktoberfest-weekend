@@ -5,4 +5,5 @@ export type TaskCommand =
   | { type: 'update'; taskId: string; payload: UpdateTaskInput }
   | { type: 'delete'; taskId: string }
   | { type: 'set_status'; taskId: string; status: TaskStatus }
-  | { type: 'set_read'; taskId: string; isRead: boolean };
+  | { type: 'set_read'; taskId: string; isRead: boolean }
+  | { type: 'acknowledge_reminder'; taskId: string; reminderAtUtc: string };

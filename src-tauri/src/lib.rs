@@ -5,6 +5,7 @@ use tauri::{
 };
 
 mod model_process;
+mod reminders;
 
 fn restore_main_window(app: &tauri::AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
@@ -20,6 +21,8 @@ pub fn run() {
             restore_main_window(app);
         }))
         .plugin(tauri_plugin_sql::Builder::default().build())
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_http::init())
         .invoke_handler(tauri::generate_handler![
             model_process::start_local_model,
             model_process::model_running,
@@ -27,12 +30,17 @@ pub fn run() {
             model_process::stop_model,
             model_process::model_exists,
             model_process::open_models_folder,
+            model_process::list_models,
+            reminders::sync_reminders,
         ])
         .setup(|app| {
             model_process::kill_stale();
             let model = model_process::ModelProcess::default();
             model_process::start_idle_timer(model.clone());
             app.manage(model);
+            let reminders = reminders::Reminders::default();
+            reminders::start(app.handle().clone(), reminders.clone());
+            app.manage(reminders);
 
             let open = MenuItem::with_id(app, "open", "Open", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;

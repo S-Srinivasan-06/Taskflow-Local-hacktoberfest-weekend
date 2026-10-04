@@ -2,6 +2,7 @@
 // Real SQLite behavior is checked separately in tasks.test.mjs.
 import { mockIPC } from '@tauri-apps/api/mocks';
 import { toLocalIsoWithoutOffset } from '../src/domain/dates.ts';
+import { MODEL_FILENAME, MODEL_PROJECTOR_FILENAME } from '../src/model/modelConfig.ts';
 
 if (!import.meta.env.DEV) throw new Error('This fixture runs only in development');
 globalThis.isTauri = true;
@@ -41,6 +42,19 @@ let modelRunning = false;
 const originalFetch = globalThis.fetch.bind(globalThis);
 globalThis.fetch = async (input, init) => {
   const url = new URL(input instanceof Request ? input.url : String(input));
+  if (url.origin === 'http://127.0.0.1:11434') {
+    if (url.pathname === '/api/tags') return Response.json({ models: [{ name: 'fixture-local:latest' }, { name: 'fixture:cloud', remote_host: 'https://example.invalid' }] });
+    if (url.pathname === '/api/show') return Response.json({ capabilities: ['completion', 'vision'] });
+    if (url.pathname === '/api/generate') return Response.json({ done: true });
+    if (url.pathname === '/api/chat') {
+      const request = JSON.parse(init.body);
+      if (!request.format || request.think !== false || request.stream !== false) throw new Error('Ollama contract not enforced');
+      const scheduled = new Date(Date.now() + 86_400_000);
+      scheduled.setHours(9, 0, 0, 0);
+      return Response.json({ message: { content: JSON.stringify({ action: 'create', title: 'Approved browser request',
+        scheduled_at_local: toLocalIsoWithoutOffset(scheduled), duration_minutes: 60 }) } });
+    }
+  }
   if (url.origin !== 'http://127.0.0.1:39281') return originalFetch(input, init);
   if (url.pathname === '/health') return new Response(JSON.stringify({ status: 'ok' }), { status: modelRunning ? 200 : 503 });
   if (url.pathname === '/v1/chat/completions' && init?.method === 'POST') {
@@ -57,6 +71,12 @@ globalThis.fetch = async (input, init) => {
 };
 
 mockIPC((command, args) => {
+  if (command === 'plugin:event|listen') return 1;
+  if (command === 'plugin:event|unlisten') return null;
+  if (command === 'sync_reminders') return null;
+  if (command === 'plugin:notification|is_permission_granted') return true;
+  if (command === 'plugin:notification|request_permission') return 'granted';
+  if (command === 'list_models') return [MODEL_FILENAME, MODEL_PROJECTOR_FILENAME];
   if (command === 'model_exists') return true;
   if (command === 'model_running') return modelRunning;
   if (command === 'start_local_model') { modelRunning = true; return null; }
@@ -81,16 +101,17 @@ mockIPC((command, args) => {
   if (command !== 'plugin:sql|execute') throw new Error('Unexpected fixture command');
   if (args.query.startsWith('CREATE')) return [0, 0];
   if (args.query.startsWith('INSERT INTO tasks')) {
-    const [id, title, scheduled_at_utc, duration_minutes, created_at_utc, updated_at_utc] = values;
+    const [id, title, scheduled_at_utc, duration_minutes, reminder_at_utc, created_at_utc, updated_at_utc] = values;
     tasks.push({ id, title, scheduled_at_utc, duration_minutes, created_at_utc, updated_at_utc,
-      status: 'todo', is_read: 0, reminder_at_utc: null, deleted_at_utc: null });
+      status: 'todo', is_read: 0, reminder_at_utc, deleted_at_utc: null });
     return [1, 0];
   }
   if (args.query.startsWith('UPDATE tasks SET ')) {
     const task = tasks.find((row) => row.id === values.at(-1) && row.deleted_at_utc === null);
     if (!task) return [0, 0];
     const columns = args.query.split(' SET ')[1].split('WHERE')[0].trim().split(', ');
-    columns.forEach((assignment, index) => { task[assignment.split(' = ')[0]] = values[index]; });
+    let parameter = 0;
+    columns.forEach(assignment => { task[assignment.split(' = ')[0]] = assignment.endsWith('NULL') ? null : values[parameter++]; });
     return [1, 0];
   }
   throw new Error('Unexpected fixture query');

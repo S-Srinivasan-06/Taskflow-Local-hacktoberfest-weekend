@@ -30,6 +30,7 @@ export function TimelineTask({ task, next, disabled, onEdit, onCommand }: Timeli
       <div className="task-body">
         <h3 id={`${id}-title`} className="task-title" data-read={task.isRead}>{task.title}</h3>
         {task.durationMinutes !== null ? <p className="duration muted">{task.durationMinutes} min</p> : null}
+        {task.reminderAtUtc ? <span className="reminder-label" title={`Reminder: ${new Date(task.reminderAtUtc).toLocaleString()}`}>Reminder</span> : null}
         <div className="task-controls">
           <label className="sr-only" htmlFor={`${id}-status`}>Status for {task.title}</label>
           <select id={`${id}-status`} aria-label={`Status for ${task.title}`} value={task.status} disabled={disabled}
@@ -41,7 +42,7 @@ export function TimelineTask({ task, next, disabled, onEdit, onCommand }: Timeli
           <button type="button" disabled={disabled} onClick={() => onEdit(task)}>Edit</button>
           <button type="button" disabled={disabled} aria-label={`Mark ${task.title} ${task.isRead ? 'unread' : 'read'}`}
             onClick={() => { void onCommand({ type: 'set_read', taskId: task.id, isRead: !task.isRead }); }}>
-            {task.isRead ? 'Mark unread' : 'Mark read'}
+            {task.isRead ? 'Unread' : 'Read'}
           </button>
           <button type="button" className="danger-text" disabled={disabled} onClick={() => setConfirmDelete(true)}>Delete</button>
         </div>

@@ -1,5 +1,5 @@
 export interface CompletionRequest {
-  messages: { role: 'system' | 'user'; content: string }[];
+  messages: { role: 'system' | 'user'; content: string; image?: string }[];
   response_format: { type: 'json_schema'; json_schema: { name: 'taskflow_action'; strict: true; schema: Record<string, unknown> } };
   chat_template_kwargs: { enable_thinking: false };
   temperature: 0;

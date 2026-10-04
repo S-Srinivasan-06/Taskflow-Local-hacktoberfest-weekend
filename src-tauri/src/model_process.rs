@@ -24,10 +24,12 @@ impl ModelProcess {
         &self,
         app: &AppHandle,
         filename: &str,
+        projector: Option<&str>,
         api_key: &str,
         port: u16,
     ) -> Result<(), String> {
         if !valid_filename(filename)
+            || projector.is_some_and(|file| !valid_filename(file))
             || api_key.len() < 16
             || api_key.len() > 128
             || !api_key
@@ -62,6 +64,10 @@ impl ModelProcess {
         if !model_path.is_file() {
             return Err("Local model not found".into());
         }
+        let projector_path = projector.map(|file| models_dir.join(file));
+        if projector_path.as_ref().is_some_and(|path| !path.is_file()) {
+            return Err("Image projector not found".into());
+        }
 
         #[cfg(debug_assertions)]
         let runtime =
@@ -76,7 +82,14 @@ impl ModelProcess {
         }
         let working_dir = runtime.parent().ok_or("Local runtime path is invalid")?;
         let working_dir = strip_verbatim_prefix(working_dir);
-        let child = hidden_command(&runtime)
+        let mut command = hidden_command(&runtime);
+        if let Some(path) = projector_path {
+            command
+                .arg("--mmproj")
+                .arg(path)
+                .args(["--image-max-tokens", "1024"]);
+        }
+        let child = command
             .arg("--model")
             .arg(model_path)
             .arg("--host")
@@ -135,7 +148,12 @@ impl ModelProcess {
 
     pub fn stop(&self) -> Result<(), String> {
         let mut running = self.0.lock().map_err(|_| "Model state is unavailable")?;
-        if let Some(mut model) = running.take() {
+        Self::stop_running(&mut running)
+    }
+
+    fn stop_running(running: &mut Option<RunningModel>) -> Result<(), String> {
+        // Retain the handle if stopping fails, so a later Quit/Unload can retry.
+        if let Some(model) = running.as_mut() {
             if model
                 .child
                 .try_wait()
@@ -146,19 +164,20 @@ impl ModelProcess {
                 let _ = model.child.wait();
             }
         }
+        *running = None;
         Ok(())
     }
 
-    fn idle(&self, timeout: Duration) -> bool {
-        self.0
-            .lock()
-            .ok()
-            .and_then(|running| {
-                running
-                    .as_ref()
-                    .map(|model| !model.busy && model.last_used.elapsed() >= timeout)
-            })
-            .unwrap_or(false)
+    fn stop_if_idle(&self, timeout: Duration) -> Result<(), String> {
+        let mut running = self.0.lock().map_err(|_| "Model state is unavailable")?;
+        // Keep the check and stop under one lock: a new request must not become busy between them.
+        if running
+            .as_ref()
+            .is_some_and(|model| !model.busy && model.last_used.elapsed() >= timeout)
+        {
+            Self::stop_running(&mut running)?;
+        }
+        Ok(())
     }
 }
 
@@ -218,9 +237,7 @@ pub fn start_idle_timer(process: ModelProcess) {
         .name("taskflow-model-idle".into())
         .spawn(move || loop {
             thread::sleep(Duration::from_secs(5));
-            if process.idle(timeout) {
-                let _ = process.stop();
-            }
+            let _ = process.stop_if_idle(timeout);
         });
 }
 
@@ -257,10 +274,39 @@ pub fn start_local_model(
     process: tauri::State<'_, ModelProcess>,
     app: AppHandle,
     filename: String,
+    projector: Option<String>,
     api_key: String,
     port: u16,
 ) -> Result<(), String> {
-    process.start(&app, &filename, &api_key, port)
+    process.start(&app, &filename, projector.as_deref(), &api_key, port)
+}
+
+#[tauri::command]
+pub fn list_models(app: AppHandle) -> Result<Vec<String>, String> {
+    let directory = app
+        .path()
+        .app_local_data_dir()
+        .map_err(|error| error.to_string())?
+        .join("models");
+    std::fs::create_dir_all(&directory).map_err(|error| error.to_string())?;
+    let mut files = Vec::new();
+    for entry in std::fs::read_dir(directory).map_err(|error| error.to_string())? {
+        let entry = entry.map_err(|error| error.to_string())?;
+        // Only files directly inside Models; no traversal or symlink targets.
+        if entry
+            .file_type()
+            .map_err(|error| error.to_string())?
+            .is_file()
+        {
+            if let Some(filename) = entry.file_name().to_str() {
+                if valid_filename(filename) {
+                    files.push(filename.to_string());
+                }
+            }
+        }
+    }
+    files.sort();
+    Ok(files)
 }
 
 #[tauri::command]

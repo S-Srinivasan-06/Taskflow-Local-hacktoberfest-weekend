@@ -57,7 +57,7 @@ export function Timeline({ tasks, now, disabled, onEdit, onCommand }: TimelinePr
       {rows(past)}
       <div className="now-marker"><span>NOW · {clock.format(now)}</span></div>
       {tasks.length === 0 ? (
-        <div className="empty-state"><h2>A little room for your day.</h2><p>Start with one task. Give it a time, and it will appear here.</p></div>
+        <div className="empty-state"><h2>No tasks</h2></div>
       ) : rows(future)}
     </div>
   );

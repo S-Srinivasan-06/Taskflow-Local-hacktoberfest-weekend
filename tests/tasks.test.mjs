@@ -31,6 +31,34 @@ function create(title = 'Gym', scheduledAtUtc = '2026-10-04T09:00:00Z', duration
   return executeTaskCommand({ type: 'create', payload: { title, scheduledAtUtc, durationMinutes } });
 }
 
+test('reminders persist, follow rescheduling, and stale delivery cannot clear a newer reminder', async t => {
+  freshDatabase(t);
+  const id = await executeTaskCommand({ type: 'create', payload: {
+    title: 'Appointment', scheduledAtUtc: '2026-10-05T10:00:00Z', reminderAtUtc: '2026-10-05T09:45:00Z',
+  } });
+  assert.equal((await getTaskById(id)).reminderAtUtc, '2026-10-05T09:45:00.000Z');
+  await executeTaskCommand({ type: 'update', taskId: id, payload: { scheduledAtUtc: '2026-10-05T12:00:00Z' } });
+  assert.equal((await getTaskById(id)).reminderAtUtc, '2026-10-05T11:45:00.000Z');
+  await executeTaskCommand({ type: 'acknowledge_reminder', taskId: id, reminderAtUtc: '2026-10-05T09:45:00Z' });
+  assert.equal((await getTaskById(id)).reminderAtUtc, '2026-10-05T11:45:00.000Z');
+  await executeTaskCommand({ type: 'acknowledge_reminder', taskId: id, reminderAtUtc: '2026-10-05T11:45:00Z' });
+  assert.equal((await getTaskById(id)).reminderAtUtc, null);
+  await executeTaskCommand({ type: 'update', taskId: id, payload: { reminderAtUtc: '2026-10-05T12:00:00Z' } });
+  await executeTaskCommand({ type: 'set_status', taskId: id, status: 'done' });
+  assert.equal((await getTaskById(id)).reminderAtUtc, null);
+});
+
+test('invalid reminders do not create or change task rows', async t => {
+  freshDatabase(t);
+  await assert.rejects(executeTaskCommand({ type: 'create', payload: {
+    title: 'Bad reminder', scheduledAtUtc: '2026-10-05T10:00:00Z', reminderAtUtc: '2026-10-05T11:00:00Z',
+  } }), /Reminder/);
+  assert.equal((await listTimelineTasks()).length, 0);
+  const id = await create();
+  await assert.rejects(executeTaskCommand({ type: 'update', taskId: id, payload: { reminderAtUtc: 'invalid' } }));
+  assert.equal((await getTaskById(id)).reminderAtUtc, null);
+});
+
 test('bootstrap makes only the tasks table and caches the connection', async (t) => {
   const sqlite = freshDatabase(t);
   const [first, second] = await Promise.all([getDb(), getDb()]);
