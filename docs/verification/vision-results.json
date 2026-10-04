@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-04T16:00:09.593Z",
+  "passed": true,
+  "syntheticImage": true,
+  "result": {
+    "kind": "proposal",
+    "command": {
+      "type": "create",
+      "payload": {
+        "title": "Dentist appointment",
+        "scheduledAtUtc": "2026-10-05T04:30:00.000Z",
+        "durationMinutes": 45
+      }
+    }
+  }
+}

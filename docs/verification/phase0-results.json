@@ -1,10 +1,10 @@
 {
-  "checkedAt": "2026-10-04T10:50:42.411Z",
+  "checkedAt": "2026-10-04T16:07:16.597Z",
   "server": "http://127.0.0.1:39281",
   "model": "taskflow-local",
   "schemaCanary": {
     "passed": true,
-    "elapsedMs": 1671,
+    "elapsedMs": 1916,
     "expected": {
       "proof": "required"
     },
@@ -17,7 +17,7 @@
     {
       "id": "create-gym",
       "passed": true,
-      "elapsedMs": 13463,
+      "elapsedMs": 8297,
       "action": {
         "action": "create",
         "title": "gym",
@@ -28,7 +28,7 @@
     {
       "id": "files-done",
       "passed": true,
-      "elapsedMs": 23470,
+      "elapsedMs": 15823,
       "action": {
         "action": "set_status",
         "task_ref": 6,
@@ -38,7 +38,7 @@
     {
       "id": "move-gym",
       "passed": true,
-      "elapsedMs": 5888,
+      "elapsedMs": 4336,
       "action": {
         "action": "update",
         "task_ref": 1,
@@ -48,7 +48,7 @@
     {
       "id": "report-unread",
       "passed": true,
-      "elapsedMs": 4461,
+      "elapsedMs": 3131,
       "action": {
         "action": "set_read",
         "task_ref": 11,
@@ -58,7 +58,7 @@
     {
       "id": "tonight-query",
       "passed": true,
-      "elapsedMs": 6510,
+      "elapsedMs": 4755,
       "action": {
         "action": "query",
         "kind": "range",

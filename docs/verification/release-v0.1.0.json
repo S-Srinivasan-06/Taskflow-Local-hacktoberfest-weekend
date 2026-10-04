@@ -1,0 +1,22 @@
+{
+    "capturedAtUtc":  "2026-10-04T16:40:23Z",
+    "tag":  "v0.1.0",
+    "applicationSourceCommit":  "ca56052fb236aa326c5a4dee022bb506e05f27fa",
+    "build":  "npm run tauri build (TypeScript check, Vite, Rust release, NSIS)",
+    "testsRerunAfterReview":  false,
+    "installedBuildVerified":  false,
+    "runtimeFilesInPortable":  32,
+    "modelWeightsBundled":  false,
+    "assets":  [
+                   {
+                       "name":  "Taskflow-Local-0.1.0-windows-x64-setup.exe",
+                       "bytes":  14564611,
+                       "sha256":  "827cf77f57b5db02480453fc57ea564f1b58f6dede0d027d3ed2a22eeccd474d"
+                   },
+                   {
+                       "name":  "Taskflow-Local-0.1.0-windows-x64-portable.zip",
+                       "bytes":  25324003,
+                       "sha256":  "51390d13b719e2578167a8344eb367aa41f1ae38b9c02778a32e859f9f4eb2f6"
+                   }
+               ]
+}
