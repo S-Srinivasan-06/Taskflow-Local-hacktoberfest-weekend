@@ -10,7 +10,7 @@ The Windows x64 release includes the app and llama.cpp runtime. Model weights ar
 
 Release sizes: approximately **13.9 MiB** for the installer and **24.2 MiB** for the portable ZIP. [Recorded build provenance and asset hashes](docs/verification/release-v0.1.0.json) connect these files to the reviewed application source.
 
-[The problem](#why-taskflow-local-exists) · [Demo walkthrough](#demo-walkthrough) · [Language commands](#exactly-how-language-commands-work) · [Installation](#installation-requirements-and-exe-usage) · [Model setup](#model-file-placement) · [Architecture](#architecture-and-tech-stack) · [Evidence and limits](#checks-and-known-limitations) · [Deadline disclosure](#post-deadline-change-disclosure--updated-october-4-2026-utc)
+[The problem](#why-taskflow-local-exists) · [Demo walkthrough](#demo-walkthrough) · [Language commands](#exactly-how-language-commands-work) · [Installation](#installation-requirements-and-exe-usage) · [Model setup](#model-file-placement) · [Architecture](#architecture-and-tech-stack) · [Evidence and limits](#checks-and-known-limitations) · [Deadline disclosure](#post-deadline-change-disclosure--updated-october-5-2026-utc)
 
 ## Why Taskflow Local exists
 
@@ -52,7 +52,9 @@ The installed-build acceptance check is still outstanding. There was no prior Gi
 - **Reminders:** Windows notifications at the task time or a selected interval before it, including while the window is hidden in the tray.
 - **Compact controls:** search, status/date filters, and Classic, Slate, Nord, Dracula, and Solarized colour schemes.
 - **Local model selection:** choose downloaded GGUF files or locally installed Ollama models in Settings.
-- **Screenshot input:** attach a PNG/JPEG and review one proposed task using an image-capable model. Images are not saved as attachments.
+- **Screenshot input:** attach a PNG/JPEG or focus the request box and paste an image with **Ctrl+V** (up to 5 MB), then review one proposed task using an image-capable model. Images are not saved as attachments.
+
+**October 5 source update (before the deadline):** the request box now stays visible while tasks/settings and long results scroll, a **Chat** button focuses it, and clipboard images use the existing attachment validation and approval flow. The updated local executable was rebuilt successfully; the published `v0.1.0` assets still contain the earlier build. Typecheck, 32 existing checks, Rust check, and the Windows build passed. A synthetic browser fixture verified image pasting and small-window scrolling; real Windows notification banner delivery remains unverified.
 
 ## Screenshots
 
@@ -516,15 +518,15 @@ First finish the installed Windows acceptance pass, including reminders, and gat
 - **Development assistance:** implementation and checks were assisted by OpenAI Codex. The application's inference runs locally with Gemma, independently of that development tooling.
 - No third-party task text or original Taskflow implementation is included in the screenshots; their data comes from synthetic test fixtures.
 
-## Post-deadline change disclosure — updated October 4, 2026 (UTC)
+## Post-deadline change disclosure — updated October 5, 2026 (UTC)
 
 **Deadline: October 5, 2026, 06:59 UTC.** The [DEV challenge rules](https://dev.to/challenges/hacktoberfest-weekend-2026-10-01) require commits after the submission deadline to be noted in the README.
 
-**As of October 4, 2026 (UTC), there are no post-deadline commits or changes: the deadline has not occurred.** The initial source snapshot, feature update, two code-review passes, README expansion, and `v0.1.0` release preparation are all pre-deadline work. Git history records the actual commit times; there is no claim that the later review fixes were covered by the earlier tests.
+**As of October 5, 2026, 04:39 UTC, there are no post-deadline commits or changes: the deadline has not occurred.** The initial source snapshot, feature update, two code-review passes, README expansion, `v0.1.0` release preparation, and October 5 clipboard/scrolling fixes are all pre-deadline work. Git history records the actual commit times; verification of the latest source is described above separately from the published release evidence.
 
 | UTC date/time | Commit/change | Scope and effect |
 | --- | --- | --- |
-| None as of 2026-10-04 UTC | No post-deadline changes | Pre-deadline snapshot |
+| None as of 2026-10-05 04:39 UTC | No post-deadline changes | Pre-deadline snapshot |
 
 Pre-deadline source milestones: [`e1517d0`](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/commit/e1517d01063e4a0c68014729f3d62d0ac81ca5f8) records the initial desktop snapshot; [`ca56052`](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/commit/ca56052fb236aa326c5a4dee022bb506e05f27fa) records the feature update and both code-review passes. The `v0.1.0` tag also includes the expanded documentation and release evidence.
 

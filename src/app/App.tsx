@@ -82,9 +82,14 @@ export function App() {
       <header className="app-header">
         <h1>TASKFLOW <span>LOCAL</span></h1>
         <div className="header-actions"><span role="status">{saving ? 'Saving…' : `${remaining} open`}</span>
-          <button type="button" onClick={() => setSettings(value => !value)} aria-expanded={settings}>Settings</button>
+          {isTauri() ? <button type="button" disabled={disabled} onClick={() => document.getElementById('task-request')?.focus()}>Chat</button> : null}
+          <button type="button" onClick={() => {
+            setSettings(value => !value);
+            if (!settings) document.querySelector('.task-workspace')?.scrollTo({ top: 0 });
+          }} aria-expanded={settings}>Settings</button>
           <button type="button" className="primary" ref={newTaskButton} disabled={disabled} onClick={() => openEditor(null)}>+ New task</button></div>
       </header>
+      <main className="task-workspace" aria-label="Tasks and settings">
       {settings ? <Settings theme={theme} onTheme={setTheme} onClose={() => setSettings(false)} /> : null}
       <div className="task-filters" aria-label="Filter tasks">
         <input ref={searchInput} aria-label="Search tasks" placeholder="Search tasks…" value={search} onChange={event => setSearch(event.target.value)} />
@@ -105,6 +110,7 @@ export function App() {
       {reminderError ? <p className="notice" role="alert">{reminderError}</p> : null}
       {loading ? <p className="loading" role="status">Loading your tasks…</p> : null}
       {loaded ? <Timeline tasks={visibleTasks} now={now} disabled={disabled} onEdit={openEditor} onCommand={runCommand} /> : null}
+      </main>
       {isTauri() ? <Composer disabled={disabled} modelState={modelStatus} modelError={modelDetails.failureMessage} imageCapable={modelDetails.vision} interpret={interpretUserRequest}
         onCommand={runCommand} onUnload={unloadModel} onOpenModels={openModelsFolder} onRefreshModels={refreshModelAvailability} /> : null}
     </div>

@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { getTaskById, listTimelineTasks } from '../../db/taskRepository.ts';
 import type { TaskCommand } from '../../domain/actions.ts';
 import type { Interpretation, InterpretOptions } from '../../model/modelService.ts';
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, ClipboardEvent } from 'react';
 
 interface Props {
   disabled: boolean;
@@ -50,7 +50,22 @@ export function Composer({ disabled, modelState, modelError, imageCapable, inter
   async function attachImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = '';
-    if (!file || running.current || disabled) return;
+    if (file) await readImage(file);
+  }
+
+  function pasteImage(event: ClipboardEvent<HTMLElement>) {
+    const item = Array.from(event.clipboardData.items).find(item => item.kind === 'file' && item.type.startsWith('image/'));
+    const file = item?.getAsFile();
+    if (!file) return;
+    event.preventDefault();
+    void readImage(file);
+  }
+
+  async function readImage(file: File) {
+    if (running.current || disabled) return;
+    if (!imageCapable) {
+      setNotice('Choose an image-capable model and its matching projector in Settings.'); return;
+    }
     if (!['image/png', 'image/jpeg'].includes(file.type) || file.size > 5 * 1024 * 1024) {
       setNotice('Choose a PNG or JPEG image smaller than 5 MB.'); return;
     }
@@ -127,7 +142,20 @@ export function Composer({ disabled, modelState, modelError, imageCapable, inter
   const status = modelState === 'missing' ? 'Model not found' : modelState === 'starting' ? 'Starting…'
     : modelState === 'ready' ? 'Ready' : modelState === 'error' ? modelError || 'Could not start. Try again.' : 'Model idle';
 
-  return <section className="composer" aria-label="Task requests">
+  return <section className="composer" aria-label="Task requests" onPaste={pasteImage}>
+    <form className="composer-input" onSubmit={event => { event.preventDefault(); void send(); }}>
+      <input ref={imageInput} className="sr-only" type="file" accept="image/png,image/jpeg" aria-label="Choose screenshot"
+        onChange={event => { void attachImage(event); }} disabled={busy || disabled || !imageCapable} />
+      <button type="button" disabled={busy || disabled} aria-label="Attach screenshot" title="Attach screenshot" onClick={() => {
+        if (!imageCapable) setNotice('Choose an image-capable model and its matching projector in Settings.');
+        else imageInput.current?.click();
+      }}>Image</button>
+      <label className="sr-only" htmlFor="task-request">Tell Taskflow something</label>
+      <input id="task-request" value={text} maxLength={1500} placeholder="Tell Taskflow something…" disabled={busy || disabled}
+        title="Type a request or paste a screenshot with Ctrl+V"
+        onChange={event => setText(event.target.value)} />
+      <button type="submit" className="primary" disabled={busy || disabled || (!text.trim() && !image)}>{busy ? modelState === 'starting' ? 'Starting…' : 'Working…' : 'Send'}</button>
+    </form>
     <div className="composer-status"><span role="status">{status}</span>
       {modelState === 'ready' || modelState === 'error' ? <button type="button" disabled={busy} onClick={() => { void manageModel(onUnload); }}>Unload</button> : null}
       {modelState === 'missing' ? <><button type="button" disabled={busy} onClick={() => { void manageModel(onOpenModels); }}>Open Models Folder</button>
@@ -154,20 +182,8 @@ export function Composer({ disabled, modelState, modelError, imageCapable, inter
         <button type="button" onClick={() => setResult(null)}>Dismiss</button></div> : null}
       {result?.kind === 'error' ? <p role="alert">{result.message}</p> : null}
       {notice ? <p role="status">{notice}</p> : null}
-    </div>
     {image ? <div className="image-attachment"><img src={image.data} alt="Selected screenshot" /><span>{image.name}</span>
       <button type="button" disabled={busy} onClick={() => setImage(null)}>Remove image</button></div> : null}
-    <form className="composer-input" onSubmit={event => { event.preventDefault(); void send(); }}>
-      <input ref={imageInput} className="sr-only" type="file" accept="image/png,image/jpeg" aria-label="Choose screenshot"
-        onChange={event => { void attachImage(event); }} disabled={busy || disabled || !imageCapable} />
-      <button type="button" disabled={busy || disabled} aria-label="Attach screenshot" title="Attach screenshot" onClick={() => {
-        if (!imageCapable) setNotice('Choose an image-capable model and its matching projector in Settings.');
-        else imageInput.current?.click();
-      }}>Image</button>
-      <label className="sr-only" htmlFor="task-request">Tell Taskflow something</label>
-      <input id="task-request" value={text} maxLength={1500} placeholder="Tell Taskflow something…" disabled={busy || disabled}
-        onChange={event => setText(event.target.value)} />
-      <button type="submit" className="primary" disabled={busy || disabled || (!text.trim() && !image)}>{busy ? modelState === 'starting' ? 'Starting…' : 'Working…' : 'Send'}</button>
-    </form>
+    </div>
   </section>;
 }

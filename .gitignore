@@ -13,3 +13,6 @@ models/
 *.db
 *.db-shm
 *.db-wal
+# Local app copy kept at the project root for easy launching.
+/Taskflow Local.exe
+/runtime/
