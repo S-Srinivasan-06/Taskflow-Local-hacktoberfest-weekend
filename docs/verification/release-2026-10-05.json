@@ -63,5 +63,10 @@
                        "bytes":  25317797,
                        "sha256":  "7f76f863510cdba48f88f85e895c10fc3438f933380c4ca393ad1ecb258e2ff9"
                    }
-               ]
+               ],
+    "sourceCommit":  "110eacb66cd05af52cf65f38497e1c996ffa67ce",
+    "sourceCommitUtc":  "2026-10-05T18:23:49Z",
+    "publishedReleaseUrl":  "https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/releases/tag/desktop-update-2026-10-05",
+    "publicDownloadsVerifiedAtUtc":  "2026-10-05T18:27:19Z",
+    "publicDownloadsWithoutAuthentication":  true
 }
