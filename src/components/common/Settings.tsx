@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { invoke, isTauri } from '@tauri-apps/api/core';
 import { getModelSelection, listAvailableModels, openModelsFolder, refreshModelAvailability, selectModel, subscribeModelStatus } from '../../model/desktopModel.ts';
 import type { ModelSelection } from '../../model/desktopModel.ts';
-import { THEMES } from '../../state/preferences.ts';
+import { THEMES, THEME_NAMES } from '../../state/preferences.ts';
 import type { Theme } from '../../state/preferences.ts';
 
 interface Props { theme: Theme; onTheme(theme: Theme): void; onClose(): void }
@@ -11,6 +12,20 @@ export function Settings({ theme, onTheme, onClose }: Props) {
   const [catalog, setCatalog] = useState<{ files: string[]; ollama: string[]; ollamaError: string }>({ files: [], ollama: [], ollamaError: '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [notificationBusy, setNotificationBusy] = useState(false);
+  const [notificationNotice, setNotificationNotice] = useState('');
+
+  async function testNotification() {
+    if (notificationBusy) return;
+    setNotificationBusy(true);
+    setNotificationNotice('');
+    try {
+      await invoke('test_notification');
+      setNotificationNotice('Test sent. Check Windows notifications. If no banner appears, check Taskflow in Windows notification settings and Do Not Disturb.');
+    } catch {
+      setNotificationNotice('Could not send the test. Use the installed app and check Windows notification settings.');
+    } finally { setNotificationBusy(false); }
+  }
 
   async function refresh() {
     setBusy(true); setError('');
@@ -37,10 +52,18 @@ export function Settings({ theme, onTheme, onClose }: Props) {
   const values = [...models.map(model => `gguf|${model}`), ...catalog.ollama.map(model => `ollama|${model}`)];
   return <section className="settings surface" aria-label="Settings">
     <div className="settings-heading"><h2>Settings</h2><button type="button" onClick={onClose}>Close</button></div>
-    <label htmlFor="theme">Colour scheme</label>
-    <select id="theme" value={theme} onChange={event => onTheme(event.target.value as Theme)}>
-      {THEMES.map(name => <option value={name} key={name}>{name[0].toUpperCase() + name.slice(1)}</option>)}
-    </select>
+    <fieldset className="theme-picker">
+      <legend>Colour scheme</legend>
+      <div className="theme-grid">{THEMES.map(name => <label className="theme-option" key={name}
+        data-theme={name} data-selected={theme === name}>
+        <input className="sr-only" type="radio" name="theme" value={name} checked={theme === name}
+          onChange={() => onTheme(name)} />
+        <span className="theme-swatches" aria-hidden="true"><span /><span /><span /></span>
+        <span className="theme-name">{THEME_NAMES[name]}<span aria-hidden="true">{theme === name ? '✓' : ''}</span></span>
+      </label>)}</div>
+    </fieldset>
+    <details className="settings-group">
+    <summary>Local model</summary>
     <label htmlFor="local-model">Model</label>
     <select id="local-model" disabled={busy} value={value} onChange={event => {
       const [provider, ...parts] = event.target.value.split('|');
@@ -62,6 +85,13 @@ export function Settings({ theme, onTheme, onClose }: Props) {
     </> : catalog.ollamaError ? <p className="muted settings-help">{catalog.ollamaError}</p> : null}
     <div className="settings-actions"><button type="button" disabled={busy} onClick={() => { void refresh(); }}>{busy ? 'Checking…' : 'Refresh models'}</button>
       <button type="button" onClick={() => { void openModelsFolder().catch(() => setError('Could not open Models folder.')); }}>Open Models Folder</button></div>
+    </details>
+    {isTauri() ? <div className="settings-group notification-controls">
+      <button type="button" disabled={notificationBusy} onClick={() => { void testNotification(); }}>
+        {notificationBusy ? 'Sending…' : 'Test notification'}
+      </button>
+      {notificationNotice ? <p className="settings-help" role="status">{notificationNotice}</p> : null}
+    </div> : null}
     {error ? <p className="error-text" role="alert">{error}</p> : null}
   </section>;
 }

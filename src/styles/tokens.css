@@ -1,15 +1,22 @@
-:root {
+:root, [data-theme="classic"] {
   /* Literal visual values from the original Taskflow styles; no implementation copied. */
   --tf-bg: #f5f5f4;
   --tf-surface: #ffffff;
   --tf-fg: #000000;
-  --tf-muted: #717182;
+  --tf-muted: #686877;
   --tf-soft: #e5e5e5;
   --tf-accent: #f97316;
+  --tf-secondary: #a3b99e;
+  --tf-accent-soft: #fff0df;
+  --tf-panel: #efefeb;
+  --tf-line: #d1d3cc;
+  --tf-on-danger: #ffffff;
+  --tf-ready: #477b53;
   --tf-danger: #d4183d;
   --tf-font: "Inter", "Segoe UI", system-ui, sans-serif;
   --tf-mono: "JetBrains Mono", Consolas, monospace;
   --tf-border: 1px;
+  --tf-focus-width: 2px;
   --tf-radius: 0;
   --tf-shadow: 1px 1px 0 var(--tf-outline);
   --tf-outline: #000000;
@@ -33,31 +40,85 @@
   --tf-weight-bold: 700;
   --tf-tracking: 0.08em;
   --tf-disabled-opacity: 0.5;
-  --tf-done-opacity: 0.65;
+  --tf-done-opacity: 0.8;
   --tf-time-column: 4.5rem;
   --tf-window-width: 760px;
   --tf-control-height: 32px;
   --tf-small-control-height: 26px;
-  --tf-image-preview-height: 100px;
+  --tf-image-preview-height: 72px;
+  --tf-theme-tile-width: 104px;
+  --tf-swatch-height: 12px;
+  --tf-status-dot: 6px;
+  --tf-request-height: 36px;
+  --tf-filter-layer: 2;
+  --tf-logo-size: 32px;
+  --tf-switch-width: 28px;
+  --tf-switch-height: 16px;
+  --tf-switch-thumb: 10px;
+  color-scheme: light;
 }
 
-:root[data-theme="slate"] {
+[data-theme="slate"] {
   --tf-bg: #0f172a; --tf-surface: #1e293b; --tf-fg: #f1f5f9;
   --tf-muted: #cbd5e1; --tf-soft: #475569; --tf-outline: #64748b;
   --tf-accent: #38bdf8; --tf-danger: #fda4af;
+  --tf-panel: #263448; --tf-line: #455368; --tf-accent-soft: #193b50; --tf-secondary: #9caee0;
+  --tf-on-accent: #111111; --tf-on-danger: #111111; --tf-ready: #9dcfa8; color-scheme: dark;
 }
-:root[data-theme="nord"] {
+[data-theme="nord"] {
   --tf-bg: #2e3440; --tf-surface: #3b4252; --tf-fg: #eceff4;
   --tf-muted: #d8dee9; --tf-soft: #4c566a; --tf-outline: #81a1c1;
   --tf-accent: #88c0d0; --tf-danger: #e7a1aa;
+  --tf-panel: #434c5e; --tf-line: #596579; --tf-accent-soft: #344f60; --tf-secondary: #a3be8c;
+  --tf-on-accent: #111111; --tf-on-danger: #111111; --tf-ready: #a3be8c; color-scheme: dark;
 }
-:root[data-theme="dracula"] {
+[data-theme="dracula"] {
   --tf-bg: #282a36; --tf-surface: #343746; --tf-fg: #f8f8f2;
   --tf-muted: #bfc2d9; --tf-soft: #6272a4; --tf-outline: #6272a4;
   --tf-accent: #50fa7b; --tf-danger: #ff8b8b;
+  --tf-panel: #3d4051; --tf-line: #62677d; --tf-accent-soft: #284b3a; --tf-secondary: #ffb86c;
+  --tf-on-accent: #111111; --tf-on-danger: #111111; --tf-ready: #50fa7b; color-scheme: dark;
 }
-:root[data-theme="solarized"] {
+[data-theme="solarized"] {
   --tf-bg: #fdf6e3; --tf-surface: #eee8d5; --tf-fg: #073642;
-  --tf-muted: #586e75; --tf-soft: #93a1a1; --tf-outline: #657b83;
+  --tf-muted: #506268; --tf-soft: #93a1a1; --tf-outline: #657b83;
   --tf-accent: #93c8df; --tf-danger: #b52b28;
+  --tf-panel: #e4dfcb; --tf-line: #b3b8a7; --tf-accent-soft: #d3e4df; --tf-secondary: #b7be81;
+  --tf-on-accent: #111111; --tf-on-danger: #ffffff; --tf-ready: #526c32; color-scheme: light;
+}
+[data-theme="cyberpunk"] {
+  --tf-bg: #0c1118; --tf-surface: #161e28; --tf-panel: #202a35;
+  --tf-fg: #f8f3d5; --tf-muted: #b0bdc8; --tf-soft: #46525f; --tf-line: #45525e; --tf-outline: #536573;
+  --tf-accent: #f4df4e; --tf-secondary: #5bd9dc; --tf-accent-soft: #383623; --tf-danger: #ff8792;
+  --tf-on-accent: #151a20; --tf-on-danger: #151a20; --tf-ready: #5bd9dc; color-scheme: dark;
+}
+[data-theme="dark-grey"] {
+  --tf-bg: #202224; --tf-surface: #2b2e31; --tf-panel: #34383c;
+  --tf-fg: #f2f3ef; --tf-muted: #bdc2bc; --tf-soft: #51575c; --tf-line: #51575c; --tf-outline: #626b6c;
+  --tf-accent: #afc4bb; --tf-secondary: #b5bed0; --tf-accent-soft: #35443e; --tf-danger: #f1a5a0;
+  --tf-on-accent: #202724; --tf-on-danger: #202724; --tf-ready: #afc4bb; color-scheme: dark;
+}
+[data-theme="full-black"] {
+  --tf-bg: #000000; --tf-surface: #000000; --tf-panel: #121212;
+  --tf-fg: #f2f2f2; --tf-muted: #b0b0b0; --tf-soft: #484848; --tf-line: #484848; --tf-outline: #686868;
+  --tf-accent: #dedede; --tf-secondary: #969696; --tf-accent-soft: #222222; --tf-danger: #ffaaaa;
+  --tf-on-accent: #111111; --tf-on-danger: #111111; --tf-ready: #b9d4bd; color-scheme: dark;
+}
+[data-theme="forest"] {
+  --tf-bg: #18251b; --tf-surface: #233527; --tf-panel: #2c4330;
+  --tf-fg: #edf0d7; --tf-muted: #c1cbac; --tf-soft: #536b48; --tf-line: #526747; --tf-outline: #758b56;
+  --tf-accent: #aac573; --tf-secondary: #d7c37d; --tf-accent-soft: #354b2e; --tf-danger: #f0a38d;
+  --tf-on-accent: #1e2e20; --tf-on-danger: #1e2e20; --tf-ready: #afc875; color-scheme: dark;
+}
+[data-theme="bubblegum"] {
+  --tf-bg: #f9edf1; --tf-surface: #fff8fb; --tf-panel: #f3dfe8;
+  --tf-fg: #4b293a; --tf-muted: #795365; --tf-soft: #dfc3d0; --tf-line: #d9bac9; --tf-outline: #b5879d;
+  --tf-accent: #efa7c2; --tf-secondary: #d6bfdc; --tf-accent-soft: #f5dbe5; --tf-danger: #a12f4c;
+  --tf-on-accent: #4b293a; --tf-on-danger: #fff8fb; --tf-ready: #526e52; color-scheme: light;
+}
+[data-theme="autumn"] {
+  --tf-bg: #2c211b; --tf-surface: #3a2b22; --tf-panel: #4a3528;
+  --tf-fg: #f6e7d2; --tf-muted: #d6bda0; --tf-soft: #70543d; --tf-line: #70543d; --tf-outline: #a37b54;
+  --tf-accent: #daa36c; --tf-secondary: #aabd86; --tf-accent-soft: #59412b; --tf-danger: #ffaba0;
+  --tf-on-accent: #2f221b; --tf-on-danger: #2f221b; --tf-ready: #b3c48b; color-scheme: dark;
 }

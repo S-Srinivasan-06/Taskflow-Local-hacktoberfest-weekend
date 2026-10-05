@@ -12,6 +12,20 @@ interface TaskEditorProps {
   onClose: () => void;
 }
 
+const REMINDER_PRESETS = [0, 5, 15, 30, 60];
+
+function reminderOption(task: Task | null): string {
+  if (!task?.reminderAtUtc) return 'none';
+  const minutes = (Date.parse(task.scheduledAtUtc) - Date.parse(task.reminderAtUtc)) / 60_000;
+  return REMINDER_PRESETS.includes(minutes) ? String(minutes) : 'custom';
+}
+
+function shiftedReminder(task: Task, scheduledAt: string): string {
+  if (!task.reminderAtUtc) return '';
+  const shift = new Date(scheduledAt).getTime() - Date.parse(task.scheduledAtUtc);
+  return toLocalIsoWithoutOffset(new Date(Date.parse(task.reminderAtUtc) + (Number.isFinite(shift) ? shift : 0)));
+}
+
 function initialTime(task: Task | null): string {
   const date = task ? new Date(task.scheduledAtUtc) : new Date();
   if (!task) date.setMinutes(date.getMinutes() + 30, 0, 0);
@@ -23,9 +37,14 @@ export function TaskEditor({ task, saving, onSave, onClose }: TaskEditorProps) {
   const [title, setTitle] = useState(task?.title ?? '');
   const [scheduledAt, setScheduledAt] = useState(() => initialTime(task));
   const [duration, setDuration] = useState(task?.durationMinutes?.toString() ?? '');
-  const originalReminder = task?.reminderAtUtc
-    ? String(Math.max(0, Math.round((Date.parse(task.scheduledAtUtc) - Date.parse(task.reminderAtUtc)) / 60_000))) : 'none';
+  const originalReminder = reminderOption(task);
   const [reminder, setReminder] = useState(originalReminder);
+  const originalCustomReminder = task?.reminderAtUtc ? toLocalIsoWithoutOffset(new Date(task.reminderAtUtc)) : '';
+  const [customReminder, setCustomReminder] = useState(originalCustomReminder);
+  const [customReminderEdited, setCustomReminderEdited] = useState(false);
+  const customReminderValue = task?.reminderAtUtc && !customReminderEdited
+    ? shiftedReminder(task, scheduledAt) : customReminder;
+  const reminderEdited = reminder !== originalReminder || reminder === 'custom' && customReminderEdited;
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const submittingRef = useRef(false);
@@ -50,15 +69,18 @@ export function TaskEditor({ task, saving, onSave, onClose }: TaskEditorProps) {
         throw new Error('Duration must be a positive whole number of minutes.');
       }
       const reminderAtUtc = reminder === 'none' ? null
-        : new Date(Date.parse(scheduledAtUtc) - Number(reminder) * 60_000).toISOString();
-      if (reminderAtUtc && (!task || reminder !== originalReminder || scheduledAtUtc !== task.scheduledAtUtc)) {
-        if (Date.parse(reminderAtUtc) <= Date.now() && reminderAtUtc !== task?.reminderAtUtc) throw new Error('Choose a future reminder time.');
+        : reminder === 'custom' ? localIsoToUtc(customReminderValue.length === 16 ? `${customReminderValue}:00` : customReminderValue)
+          : new Date(Date.parse(scheduledAtUtc) - Number(reminder) * 60_000).toISOString();
+      const reminderChanged = reminderEdited && (!task || reminderAtUtc !== task.reminderAtUtc || scheduledAtUtc !== task.scheduledAtUtc);
+      if (reminderAtUtc && reminderAtUtc > scheduledAtUtc) throw new Error('Choose a reminder at or before the task time.');
+      if (reminderAtUtc && (!task || reminderChanged || scheduledAtUtc !== task.scheduledAtUtc)) {
+        if (Date.parse(reminderAtUtc) <= Date.now() && (reminderChanged || reminderAtUtc !== task?.reminderAtUtc)) throw new Error('Choose a future reminder time.');
         await enableReminders();
       }
       // The editor may have been closed while Windows was asking for permission.
       if (!mounted.current) return;
       const payload = { title: title.trim(), durationMinutes,
-        ...(!task || reminder !== originalReminder ? { reminderAtUtc } : {}) };
+        ...(!task || reminderChanged ? { reminderAtUtc } : {}) };
       // An unchanged reminder is read from SQLite by the service, so an old editor cannot re-arm a fired reminder.
       const command: TaskCommand = task
         ? { type: 'update', taskId: task.id, payload: { ...payload,
@@ -97,9 +119,15 @@ export function TaskEditor({ task, saving, onSave, onClose }: TaskEditorProps) {
             <label htmlFor={`${id}-reminder`}>Desktop reminder</label>
             <select id={`${id}-reminder`} value={reminder} onChange={event => setReminder(event.target.value)}>
               <option value="none">None</option>
-              {[0, 5, 15, 30, 60].map(minutes => <option key={minutes} value={minutes}>{minutes ? `${minutes} minutes before` : 'At task time'}</option>)}
-              {reminder !== 'none' && ![0, 5, 15, 30, 60].includes(Number(reminder)) ? <option value={reminder}>{reminder} minutes before</option> : null}
+              {REMINDER_PRESETS.map(minutes => <option key={minutes} value={minutes}>{minutes ? `${minutes} minutes before` : 'At task time'}</option>)}
+              <option value="custom">Custom date and time</option>
             </select>
+            {reminder === 'custom' ? <div className="custom-reminder">
+              <label htmlFor={`${id}-custom-reminder`}>Reminder date and time</label>
+              <input id={`${id}-custom-reminder`} type="datetime-local" step="1" required max={scheduledAt}
+                value={customReminderValue} onChange={event => { setCustomReminderEdited(true); setCustomReminder(event.target.value); }} />
+              <p className="editor-hint muted">Moves with the task unless you change it here.</p>
+            </div> : null}
           </div>
           {error ? <p role="alert" className="error-text">{error}</p> : null}
           <div className="editor-actions">

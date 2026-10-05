@@ -8,10 +8,11 @@ import { Composer } from '../components/composer/Composer.tsx';
 import { getModelStatus, interpretUserRequest, openModelsFolder, refreshModelAvailability, subscribeModelStatus, unloadModel } from '../model/desktopModel.ts';
 import type { ModelStatus } from '../model/desktopModel.ts';
 import { Settings } from '../components/common/Settings.tsx';
-import { initialTheme, writePreference } from '../state/preferences.ts';
+import { initialTheme, readPreference, writePreference } from '../state/preferences.ts';
 import { filterTasks } from '../domain/taskFilters.ts';
 import type { TaskFilter } from '../domain/taskFilters.ts';
 import { useReminders } from '../state/useReminders.ts';
+import taskflowLogo from '../assets/taskflow-mark.svg';
 
 export function App() {
   const { tasks, loading, ready, loaded, saving, error, reload, runCommand } = useTaskflow();
@@ -21,6 +22,11 @@ export function App() {
   const [modelDetails, setModelDetails] = useState(getModelStatus);
   const [settings, setSettings] = useState(false);
   const [theme, setTheme] = useState(initialTheme);
+  const [chatEnabled, setChatEnabled] = useState(() => readPreference('chatEnabled') !== 'false');
+  const [chatBusy, setChatBusy] = useState(false);
+  const [chatSwitching, setChatSwitching] = useState(false);
+  const [chatNotice, setChatNotice] = useState('');
+  const focusChatOnEnable = useRef(false);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<TaskFilter>('all');
   const [day, setDay] = useState('');
@@ -40,6 +46,12 @@ export function App() {
     document.documentElement.dataset.theme = theme;
     writePreference('theme', theme);
   }, [theme]);
+  useEffect(() => {
+    if (chatEnabled && focusChatOnEnable.current) {
+      focusChatOnEnable.current = false;
+      document.getElementById('task-request')?.focus();
+    }
+  }, [chatEnabled]);
 
   function openEditor(task: Task | null) {
     editorTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -53,6 +65,21 @@ export function App() {
       if (trigger?.isConnected) trigger.focus();
       else newTaskButton.current?.focus();
     });
+  }
+
+  async function toggleChat() {
+    if (chatBusy || chatSwitching) return;
+    setChatSwitching(true);
+    setChatNotice('');
+    const next = !chatEnabled;
+    focusChatOnEnable.current = next;
+    setChatEnabled(next);
+    writePreference('chatEnabled', String(next));
+    try {
+      const status = getModelStatus().status;
+      if (!next && status !== 'missing' && status !== 'stopped') await unloadModel();
+    } catch { setChatNotice('Chat is off. The model could not be unloaded. Turn chat back on and try Unload.'); }
+    finally { setChatSwitching(false); }
   }
 
   const disabled = !ready || loading || saving || editor !== null;
@@ -80,9 +107,11 @@ export function App() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <h1>TASKFLOW <span>LOCAL</span></h1>
+        <h1><img className="app-logo" src={taskflowLogo} alt="" />TASKFLOW <span className="brand-local">LOCAL</span></h1>
         <div className="header-actions"><span role="status">{saving ? 'Saving…' : `${remaining} open`}</span>
-          {isTauri() ? <button type="button" disabled={disabled} onClick={() => document.getElementById('task-request')?.focus()}>Chat</button> : null}
+          {isTauri() ? <button type="button" className="chat-switch" role="switch" aria-label="Chat" aria-checked={chatEnabled}
+            aria-controls="task-chat" disabled={chatBusy || chatSwitching} title={chatEnabled ? 'Turn chat off' : 'Turn chat on'}
+            onClick={() => { void toggleChat(); }}>Chat<span className="switch-track" aria-hidden="true"><span /></span></button> : null}
           <button type="button" onClick={() => {
             setSettings(value => !value);
             if (!settings) document.querySelector('.task-workspace')?.scrollTo({ top: 0 });
@@ -90,6 +119,7 @@ export function App() {
           <button type="button" className="primary" ref={newTaskButton} disabled={disabled} onClick={() => openEditor(null)}>+ New task</button></div>
       </header>
       <main className="task-workspace" aria-label="Tasks and settings">
+      {chatNotice ? <p className="notice" role="alert">{chatNotice}</p> : null}
       {settings ? <Settings theme={theme} onTheme={setTheme} onClose={() => setSettings(false)} /> : null}
       <div className="task-filters" aria-label="Filter tasks">
         <input ref={searchInput} aria-label="Search tasks" placeholder="Search tasks…" value={search} onChange={event => setSearch(event.target.value)} />
@@ -111,8 +141,8 @@ export function App() {
       {loading ? <p className="loading" role="status">Loading your tasks…</p> : null}
       {loaded ? <Timeline tasks={visibleTasks} now={now} disabled={disabled} onEdit={openEditor} onCommand={runCommand} /> : null}
       </main>
-      {isTauri() ? <Composer disabled={disabled} modelState={modelStatus} modelError={modelDetails.failureMessage} imageCapable={modelDetails.vision} interpret={interpretUserRequest}
-        onCommand={runCommand} onUnload={unloadModel} onOpenModels={openModelsFolder} onRefreshModels={refreshModelAvailability} /> : null}
+      {isTauri() && chatEnabled ? <Composer disabled={disabled} modelState={modelStatus} modelError={modelDetails.failureMessage} imageCapable={modelDetails.vision} interpret={interpretUserRequest}
+        onCommand={runCommand} onUnload={unloadModel} onOpenModels={openModelsFolder} onRefreshModels={refreshModelAvailability} onBusyChange={setChatBusy} /> : null}
     </div>
   );
 }

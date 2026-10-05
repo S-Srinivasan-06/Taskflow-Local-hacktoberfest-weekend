@@ -1,0 +1,67 @@
+{
+    "capturedAtUtc":  "2026-10-05T18:21:21Z",
+    "tag":  "desktop-update-2026-10-05",
+    "applicationVersion":  "0.1.0",
+    "postDeadline":  true,
+    "sourceTagIdentifiesCommit":  true,
+    "build":  "npm run tauri build (TypeScript check, Vite, Rust release, NSIS)",
+    "checks":  {
+                   "cargoCheck":  "passed",
+                   "typecheck":  "passed",
+                   "unitTests":  {
+                                     "passed":  32,
+                                     "failed":  0
+                                 }
+               },
+    "mockedChatChecks":  {
+                             "requestBlocksToggle":  true,
+                             "approvalBeforeWrite":  true,
+                             "offHidesChat":  true,
+                             "modelUnloaded":  true,
+                             "unsavedProposalDiscarded":  true,
+                             "preferenceSurvivesReload":  true,
+                             "manualControlsRemain":  true,
+                             "enablingFocusesInput":  true,
+                             "modelRemainsIdle":  true
+                         },
+    "mockedCustomReminderChecks":  {
+                                       "invalidTimeRejectedWithoutWrite":  true,
+                                       "exactTimeRestored":  true,
+                                       "titleEditPreservesReminder":  true,
+                                       "reschedulePreservesLeadTime":  true,
+                                       "customEditSaved":  true,
+                                       "savedReminderUtc":  "2026-10-06T04:45:17.000Z"
+                                   },
+    "existingInstallation":  {
+                                 "capturedAtUtc":  "2026-10-05T18:21:14Z",
+                                 "installerExitCode":  0,
+                                 "databaseHashUnchanged":  true,
+                                 "installedMatchesBuild":  true,
+                                 "runtimeFilesMatched":  32,
+                                 "appRunning":  true,
+                                 "responding":  true,
+                                 "modelStartedOnLaunch":  false
+                             },
+    "installedAcceptanceComplete":  false,
+    "runtimeFilesInPortable":  32,
+    "modelWeightsBundled":  false,
+    "notVerified":  [
+                        "Clean Windows account installation",
+                        "Actual notification banner and Settings test-button delivery",
+                        "Tray UI interactions",
+                        "Installed-UI model lifecycle and persistence flows",
+                        "Real Ollama provider"
+                    ],
+    "assets":  [
+                   {
+                       "name":  "Taskflow-Local-2026-10-05-windows-x64-setup.exe",
+                       "bytes":  14573711,
+                       "sha256":  "c5449bf98342dc8e3aaf5eee40f3b7c7cde2ee382b0985d33baf0888821358ee"
+                   },
+                   {
+                       "name":  "Taskflow-Local-2026-10-05-windows-x64-portable.zip",
+                       "bytes":  25317797,
+                       "sha256":  "7f76f863510cdba48f88f85e895c10fc3438f933380c4ca393ad1ecb258e2ff9"
+                   }
+               ]
+}

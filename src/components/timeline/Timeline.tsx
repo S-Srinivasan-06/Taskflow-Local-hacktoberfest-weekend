@@ -30,9 +30,10 @@ export function Timeline({ tasks, now, disabled, onEdit, onCommand }: TimelinePr
     // Scroll only the timeline, once. Later task edits and clock ticks leave it alone.
     if (target) {
       const container = timeline.current.closest<HTMLElement>('.task-workspace') ?? timeline.current;
+      const filterHeight = container.querySelector<HTMLElement>('.task-filters')?.offsetHeight ?? 0;
       container.scrollTop = Math.max(0, container.scrollTop
         + target.getBoundingClientRect().top - container.getBoundingClientRect().top
-        - container.clientHeight / 3);
+        - filterHeight - Math.max(0, container.clientHeight - filterHeight) / 3);
     }
   }, []);
 

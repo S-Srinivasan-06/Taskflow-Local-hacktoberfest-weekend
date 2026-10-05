@@ -15,4 +15,6 @@ models/
 *.db-wal
 # Local app copy kept at the project root for easy launching.
 /Taskflow Local.exe
+/Taskflow Local Setup.exe
+/Taskflow Local.lnk
 /runtime/

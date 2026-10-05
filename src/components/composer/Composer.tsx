@@ -14,6 +14,7 @@ interface Props {
   onUnload(): Promise<void>;
   onOpenModels(): Promise<void>;
   onRefreshModels(): Promise<void>;
+  onBusyChange?(busy: boolean): void;
 }
 
 function dateTime(value: string) {
@@ -36,7 +37,7 @@ function proposalDetails(result: Extract<Interpretation, { kind: 'proposal' }>) 
   return { action, title, when, duration, reminder };
 }
 
-export function Composer({ disabled, modelState, modelError, imageCapable, interpret, onCommand, onUnload, onOpenModels, onRefreshModels }: Props) {
+export function Composer({ disabled, modelState, modelError, imageCapable, interpret, onCommand, onUnload, onOpenModels, onRefreshModels, onBusyChange }: Props) {
   const [text, setText] = useState('');
   const [result, setResult] = useState<Interpretation | null>(null);
   const [busy, setBusy] = useState(false);
@@ -46,6 +47,12 @@ export function Composer({ disabled, modelState, modelError, imageCapable, inter
   const [image, setImage] = useState<{ name: string; data: string } | null>(null);
   const imageInput = useRef<HTMLInputElement>(null);
   const requestImage = useRef<string | undefined>(undefined);
+
+  function setWorking(value: boolean) {
+    running.current = value;
+    setBusy(value);
+    onBusyChange?.(value);
+  }
 
   async function attachImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -69,8 +76,7 @@ export function Composer({ disabled, modelState, modelError, imageCapable, inter
     if (!['image/png', 'image/jpeg'].includes(file.type) || file.size > 5 * 1024 * 1024) {
       setNotice('Choose a PNG or JPEG image smaller than 5 MB.'); return;
     }
-    running.current = true;
-    setBusy(true);
+    setWorking(true);
     try {
       const data = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -80,13 +86,12 @@ export function Composer({ disabled, modelState, modelError, imageCapable, inter
       });
       setImage({ name: file.name, data }); setNotice('');
     } catch { setNotice('Could not read that image.'); }
-    finally { running.current = false; setBusy(false); }
+    finally { setWorking(false); }
   }
 
   async function send(selectedTaskId?: string) {
     if (running.current || disabled || (!selectedTaskId && !text.trim() && !image)) return;
-    running.current = true;
-    setBusy(true);
+    setWorking(true);
     setNotice('');
     let request = selectedTaskId ? requestText.current : text.trim() || 'Create a task from the attached screenshot. Ask for a time if it is missing.';
     const continuing = !image && Boolean(selectedTaskId || result?.kind === 'clarification');
@@ -108,13 +113,12 @@ export function Composer({ disabled, modelState, modelError, imageCapable, inter
       if (requestImage.current) setImage({ name: image?.name ?? 'Screenshot', data: requestImage.current });
       setNotice('Your request could not be completed. Try again.');
     }
-    finally { running.current = false; setBusy(false); }
+    finally { setWorking(false); }
   }
 
   async function approve() {
     if (running.current || disabled || result?.kind !== 'proposal') return;
-    running.current = true;
-    setBusy(true);
+    setWorking(true);
     try {
       if (result.task) {
         const current = await getTaskById(result.task.id);
@@ -126,23 +130,22 @@ export function Composer({ disabled, modelState, modelError, imageCapable, inter
       }
       if (await onCommand(result.command)) { setResult(null); setNotice('Saved locally.'); }
     } catch { setNotice('That change could not be saved. Try again.'); }
-    finally { running.current = false; setBusy(false); }
+    finally { setWorking(false); }
   }
 
   async function manageModel(action: () => Promise<void>) {
     if (running.current) return;
-    running.current = true;
-    setBusy(true);
+    setWorking(true);
     try { await action(); }
     catch { setNotice('That action could not be completed. Try again.'); }
-    finally { running.current = false; setBusy(false); }
+    finally { setWorking(false); }
   }
 
   const proposal = result?.kind === 'proposal' ? proposalDetails(result) : null;
   const status = modelState === 'missing' ? 'Model not found' : modelState === 'starting' ? 'Starting…'
     : modelState === 'ready' ? 'Ready' : modelState === 'error' ? modelError || 'Could not start. Try again.' : 'Model idle';
 
-  return <section className="composer" aria-label="Task requests" onPaste={pasteImage}>
+  return <section id="task-chat" className="composer" aria-label="Task requests" onPaste={pasteImage}>
     <form className="composer-input" onSubmit={event => { event.preventDefault(); void send(); }}>
       <input ref={imageInput} className="sr-only" type="file" accept="image/png,image/jpeg" aria-label="Choose screenshot"
         onChange={event => { void attachImage(event); }} disabled={busy || disabled || !imageCapable} />
@@ -156,7 +159,7 @@ export function Composer({ disabled, modelState, modelError, imageCapable, inter
         onChange={event => setText(event.target.value)} />
       <button type="submit" className="primary" disabled={busy || disabled || (!text.trim() && !image)}>{busy ? modelState === 'starting' ? 'Starting…' : 'Working…' : 'Send'}</button>
     </form>
-    <div className="composer-status"><span role="status">{status}</span>
+    <div className="composer-status"><span role="status" className="model-status" data-state={modelState}>{status}</span>
       {modelState === 'ready' || modelState === 'error' ? <button type="button" disabled={busy} onClick={() => { void manageModel(onUnload); }}>Unload</button> : null}
       {modelState === 'missing' ? <><button type="button" disabled={busy} onClick={() => { void manageModel(onOpenModels); }}>Open Models Folder</button>
         <button type="button" disabled={busy} onClick={() => { void manageModel(onRefreshModels); }}>Check for model</button></> : null}

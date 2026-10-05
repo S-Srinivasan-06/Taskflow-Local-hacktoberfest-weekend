@@ -32,6 +32,7 @@ pub fn run() {
             model_process::open_models_folder,
             model_process::list_models,
             reminders::sync_reminders,
+            reminders::test_notification,
         ])
         .setup(|app| {
             model_process::kill_stale();

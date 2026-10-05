@@ -12,6 +12,16 @@ type Reminder = (String, String, String, u64);
 #[derive(Clone, Default)]
 pub struct Reminders(Arc<Mutex<ReminderState>>);
 
+#[tauri::command]
+pub fn test_notification(app: AppHandle) -> Result<(), String> {
+    app.notification()
+        .builder()
+        .title("Taskflow Local")
+        .body("This is a test notification. Task reminders appear here too.")
+        .show()
+        .map_err(|_| "Could not send the notification. Check Windows notification settings.".into())
+}
+
 #[derive(Default)]
 struct ReminderState {
     pending: HashMap<String, Reminder>,

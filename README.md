@@ -4,11 +4,11 @@
 
 Built for the [Hacktoberfest Weekend Challenge: Build for a Friend](https://dev.to/challenges/hacktoberfest-weekend-2026-10-01), October 2–5, 2026. Intended partner category: **Best Use of Gemma**. The challenge accepts local Gemma inference; this project uses it to operate real tasks rather than generate conversational answers.
 
-**Download:** [Windows installer (.exe)](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/releases/download/v0.1.0/Taskflow-Local-0.1.0-windows-x64-setup.exe) · [Portable ZIP](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/releases/download/v0.1.0/Taskflow-Local-0.1.0-windows-x64-portable.zip) · [Release notes and SHA-256 checksums](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/releases/tag/v0.1.0)
+**Latest download:** [Windows installer (.exe)](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/releases/download/desktop-update-2026-10-05/Taskflow-Local-2026-10-05-windows-x64-setup.exe) · [Portable ZIP](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/releases/download/desktop-update-2026-10-05/Taskflow-Local-2026-10-05-windows-x64-portable.zip) · [Release notes and SHA-256 checksums](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/releases/tag/desktop-update-2026-10-05)
 
 The Windows x64 release includes the app and llama.cpp runtime. Model weights are a separate download. You can use every manual task control before installing a model.
 
-Release sizes: approximately **13.9 MiB** for the installer and **24.2 MiB** for the portable ZIP. [Recorded build provenance and asset hashes](docs/verification/release-v0.1.0.json) connect these files to the reviewed application source.
+The **October 5 desktop update contains post-deadline changes**, including eleven themes, UI refinements, the original Taskflow logo, a Chat switch, custom reminder times and a notification test control. See [its build evidence and hashes](docs/verification/release-2026-10-05.json) and the dated disclosure below. Its application version metadata remains `0.1.0`; the dated release tag identifies this newer build. The original [pre-deadline `v0.1.0` release](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/releases/tag/v0.1.0) and [its provenance](docs/verification/release-v0.1.0.json) remain unchanged.
 
 [The problem](#why-taskflow-local-exists) · [Demo walkthrough](#demo-walkthrough) · [Language commands](#exactly-how-language-commands-work) · [Installation](#installation-requirements-and-exe-usage) · [Model setup](#model-file-placement) · [Architecture](#architecture-and-tech-stack) · [Evidence and limits](#checks-and-known-limitations) · [Deadline disclosure](#post-deadline-change-disclosure--updated-october-5-2026-utc)
 
@@ -48,13 +48,15 @@ The installed-build acceptance check is still outstanding. There was no prior Gi
 - **Real query results:** answers are selected from SQLite, not invented by the model.
 - **Local persistence:** tasks survive normal Quit and reopen; dates are stored in UTC and shown locally.
 - **Desktop behavior:** closing the window hides it; the tray remains; opening again restores the existing window.
-- **Model independence:** app startup does not load the model; manual task management works without it.
-- **Reminders:** Windows notifications at the task time or a selected interval before it, including while the window is hidden in the tray.
-- **Compact controls:** search, status/date filters, and Classic, Slate, Nord, Dracula, and Solarized colour schemes.
+- **Model independence:** app startup does not load the model; manual task management works without it. The header's **Chat** switch enables/disables the request controls and remembers the setting.
+- **Reminders:** Windows notifications at the task time, a selected interval before it, or a **Custom date and time**, including while the window is hidden in the tray. Custom reminders must be in the future and at or before the task time. Editing the task time keeps the reminder's lead time unless you explicitly change the reminder too.
+- **Compact controls:** search, status/date filters, and Classic, Slate, Nord, Dracula, Solarized, Cyberpunk, Dark Grey, Full Black, Forest, Bubblegum, and Autumn colour schemes. Forest uses dark greens with muted yellow accents; Autumn uses dark browns with warm orange accents. **Settings → Colour scheme** shows palette previews and remembers your choice. The six additional palettes, original logo and UI refinements were added after the challenge deadline and are included in the October 5 release. The preserved `v0.1.0` executable has the original five themes.
 - **Local model selection:** choose downloaded GGUF files or locally installed Ollama models in Settings.
 - **Screenshot input:** attach a PNG/JPEG or focus the request box and paste an image with **Ctrl+V** (up to 5 MB), then review one proposed task using an image-capable model. Images are not saved as attachments.
 
-**October 5 source update (before the deadline):** the request box now stays visible while tasks/settings and long results scroll, a **Chat** button focuses it, and clipboard images use the existing attachment validation and approval flow. The updated local executable was rebuilt successfully; the published `v0.1.0` assets still contain the earlier build. Typecheck, 32 existing checks, Rust check, and the Windows build passed. A synthetic browser fixture verified image pasting and small-window scrolling; real Windows notification banner delivery remains unverified.
+**October 5 source update (before the deadline):** the request box stays visible while tasks/settings and long results scroll, a **Chat** button focuses it, and clipboard images use the existing attachment validation and approval flow. These fixes are included in the October 5 desktop release; the preserved `v0.1.0` assets contain the earlier build. Typecheck, 32 existing checks, Rust check, and the Windows build passed. A synthetic browser fixture verified image pasting and small-window scrolling; real Windows notification banner delivery remains unverified.
+
+**Chat switch (October 5, after the deadline):** switch Chat off to hide its controls and unload a loaded local model. Manual tasks and reminders remain available. Switching is unavailable while a request or approval save is in progress. Turning chat off discards unsaved chat drafts/proposals without saving a task; turning it on focuses the input but does not load the model. The setting survives app restarts. Unloading a selected Ollama model leaves the separately managed Ollama service running.
 
 ## Screenshots
 
@@ -74,12 +76,20 @@ These show the real React interface with **synthetic task data and mocked deskto
 
 This synthetic image was sent to the pinned Gemma model with its matching projector. The recorded result was a **Dentist appointment** proposal for **October 5, 2026, 10:00 AM IST**, lasting **45 minutes**. The app's validated command stores that time as `2026-10-05T04:30:00.000Z`. See the [actual result JSON](docs/verification/vision-results.json). The image and result are evidence for that single example, not a claim that every screenshot is understood correctly.
 
+### October 5 dark themes — post-deadline update
+
+![Taskflow Local dark Forest theme with the original logo](docs/screenshots/forest-2026-10-05.png)
+
+![Taskflow Local dark Autumn theme with the original logo](docs/screenshots/autumn-2026-10-05.png)
+
+These are October 5 browser previews using synthetic tasks and mocked desktop/model calls. They document the post-deadline design update, not native Windows notification or tray acceptance.
+
 ## Demo walkthrough
 
-Use the [downloadable Windows release](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/releases/tag/v0.1.0) to follow this path. It demonstrates the intended user flow; the installed Windows checks listed later remain outstanding.
+Use the [latest downloadable Windows release](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/releases/tag/desktop-update-2026-10-05) to follow this path. It demonstrates the intended user flow; the installed Windows checks listed later remain outstanding.
 
 1. Open Taskflow. Add **Read a chapter** for tomorrow at 8 PM using **+ New task**, without loading the model.
-2. Edit the task and select a reminder 15 minutes before. Try the search and date/status filters, then choose a colour scheme in Settings.
+2. Edit the task and select a reminder 15 minutes before, or choose **Custom date and time**. Try the search and date/status filters, then choose a colour scheme in Settings.
 3. After model setup, type **“Move Read a chapter to tomorrow at 9 PM.”** Read the approval card. The original task stays unchanged until **Approve**; **Cancel** discards the proposal.
 4. Type **“What do I have tomorrow?”** The result is read from SQLite and needs no approval.
 5. Try **“Mark Read a chapter unread”**, then **“Mark Read a chapter as done.”** Each produces its own approval card; read state and completion are independent.
@@ -245,7 +255,7 @@ The generated installer is:
 src-tauri/target/release/bundle/nsis/Taskflow Local_0.1.0_x64-setup.exe
 ```
 
-Download the installer from [GitHub Releases](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/releases/tag/v0.1.0). Release binaries are attached as assets rather than checked into source history.
+Download the installer from [GitHub Releases](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/releases/tag/desktop-update-2026-10-05). Release binaries are attached as assets rather than checked into source history.
 
 1. Run the installer and finish setup.
 2. Launch **Taskflow Local** from the Start menu.
@@ -421,6 +431,7 @@ These are engineering observations from the implementation and source review. Th
 ```text
 src/
   app/                    Main screen and database bootstrap
+  assets/                 Original Taskflow SVG logo and square application symbol
   components/
     timeline/             Ordered tasks and NOW marker
     task/                 Manual editor
@@ -445,7 +456,9 @@ docs/                     Synthetic screenshots and model-test evidence
 
 **Passed on the development machine:** TypeScript typecheck, 32 unit tests, Rust checks and release compilation, three mocked browser scenarios, strict schema enforcement, five real-model prompts, one real-model screenshot check, and updated NSIS packaging.
 
-**Release provenance:** the 32 unit tests, three mocked browser scenarios, and real-model results above were recorded before the two final code-review passes. At the user's request, tests were not rerun during those passes. The published executable is rebuilt from the reviewed source; its release build includes TypeScript checking and Rust compilation, but compilation does not establish runtime correctness. The release tag identifies the source and `SHA256SUMS.txt` identifies its binary assets.
+**Release provenance:** the original `v0.1.0` evidence predates the two final code-review passes; at the user's request, tests were not rerun during those passes. For the October 5 desktop update, TypeScript checking, all 32 existing tests, Rust checking, and NSIS packaging passed again. Synthetic browser previews checked the darker Forest/Autumn themes and the minimum-size window with settings and long results. Mocked walkthroughs checked the chat switch, busy guard, approval before writes, preference restoration and manual controls with chat off; and custom-reminder creation, exact-time restoration, editing, rescheduling and invalid-time rejection. The release tag identifies the source and `SHA256SUMS.txt` identifies its binary assets. Earlier real-model results were not rerun for these UI changes.
+
+The October 5 installer was applied to the existing Windows installation. The installed executable matched the built app after accounting for Tauri's three-byte NSIS marker, and it contained the current frontend assets. The database hash was unchanged immediately across installation; all 32 bundled runtime files matched. Windows reported notifications enabled for the registered Taskflow identity and accepted a diagnostic toast. These checks do not establish that Windows displayed a banner or that every installed UI flow passed.
 
 Unit tests cover dates, reference validation, ambiguity, retry/locking, one write path, queries, reopening a real SQLite file, reminders, filters, and provider/image payloads. Browser tests cover manual controls, themes, model selection, screenshot proposals, and approval before writes. The installer includes the runtime EXE, DLLs, and licenses and excludes model/projector files.
 
@@ -474,7 +487,7 @@ Other limits:
 | Image input is unavailable | Select an installed model and its matching projector, then refresh; Ollama must advertise vision capability |
 | Ollama models do not appear | Start the separate local Ollama service and ensure a model has already been downloaded; cloud models are excluded |
 | A request fails or times out | Keep the retained text/image, check the selected model, try **Unload**, then retry; manual tasks remain available |
-| No reminder banner appears | Keep Taskflow running, use an installed build, and check Windows notification permissions/Do Not Disturb |
+| No reminder banner appears | Run the NSIS installer and launch the installed app; Windows toasts require its Start Menu registration. Use **Settings → Test notification**, then check Taskflow's Windows notification settings/Do Not Disturb. Keep Taskflow running, including in the tray. A queued notification does not prove that Windows displayed a banner. |
 | The window disappears after closing | Find Taskflow in the tray, including the **^** overflow menu, and choose **Open** |
 | A proposal says the task changed | Send the request again so it uses the latest saved task; the app does not overwrite the stale proposal silently |
 | Portable language controls cannot start | Extract the full ZIP and keep `runtime/llama/` beside the executable |
@@ -509,7 +522,7 @@ First finish the installed Windows acceptance pass, including reminders, and gat
 ## Attribution and licenses
 
 - **Original project code:** no license has been granted yet. Public source availability alone does not grant reuse rights. No MIT or Apache license is being assigned to Taskflow Local in this snapshot.
-- **Design inspiration:** the author's earlier [Taskflow web application](https://github.com/S-Srinivasan-06/Taskflow). Only literal visual values—colors, font choices, border, radius, and shadow offsets—were carried into `src/styles/tokens.css`; earlier components/business logic were not copied. Search, filters, and keyboard shortcuts were implemented independently for this desktop app.
+- **Design inspiration and logo:** the author's earlier [Taskflow web application](https://github.com/S-Srinivasan-06/Taskflow). Literal visual values—colors, font choices, border, radius, and shadow offsets—were carried into `src/styles/tokens.css`; earlier components/business logic were not copied. At the author's request, the original SVG artwork from `frontend/src/assets/logo.svg` is preserved in `src/assets/taskflow-logo.svg`. A square crop of its checkmark symbol, with the invisible wordmark/filter removed, supplies the header, favicon, Windows app and tray icons. Logo reuse was added after the deadline on October 5. Search, filters, and keyboard shortcuts were implemented independently for this desktop app.
 - **Model:** Google's pinned Gemma GGUF [model card](https://huggingface.co/google/gemma-4-E2B-it-qat-q4_0-gguf/blob/675cff42a74c774d6cb76f76d8eacb49b48c9b93/README.md) declares **Apache-2.0**. The weights are a separate upstream artifact and are not licensed by this repository.
 - **Image projector:** a separate artifact from the same pinned Google model repository and license; it is not bundled with the app.
 - **Additional palettes:** [Nord](https://www.nordtheme.com/docs/colors-and-palettes/) and [Dracula](https://draculatheme.com/contribute) colours follow their published palette references; controls retain Taskflow's visual style. The Solarized option is a light palette inspired by [Solarized](https://ethanschoonover.com/solarized/).
@@ -522,11 +535,15 @@ First finish the installed Windows acceptance pass, including reminders, and gat
 
 **Deadline: October 5, 2026, 06:59 UTC.** The [DEV challenge rules](https://dev.to/challenges/hacktoberfest-weekend-2026-10-01) require commits after the submission deadline to be noted in the README.
 
-**As of October 5, 2026, 04:39 UTC, there are no post-deadline commits or changes: the deadline has not occurred.** The initial source snapshot, feature update, two code-review passes, README expansion, `v0.1.0` release preparation, and October 5 clipboard/scrolling fixes are all pre-deadline work. Git history records the actual commit times; verification of the latest source is described above separately from the published release evidence.
+**Post-deadline changes began October 5, 2026, 16:46 UTC.** The initial source snapshot, feature update, two code-review passes, README expansion, `v0.1.0` release preparation, and October 5 clipboard/scrolling fixes were pre-deadline work. The notification troubleshooting, theme/UI, logo, Chat switch and custom-reminder updates below are post-deadline work. They are committed in the source snapshot tagged [`desktop-update-2026-10-05`](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/tree/desktop-update-2026-10-05); Git records its actual commit timestamp and hash. The final installer was applied and packaging evidence recorded after 18:21 UTC on October 5. The original `v0.1.0` source tag and binary assets remain unchanged.
 
 | UTC date/time | Commit/change | Scope and effect |
 | --- | --- | --- |
-| None as of 2026-10-05 04:39 UTC | No post-deadline changes | Pre-deadline snapshot |
+| 2026-10-05 UTC (requested 18:13 UTC) | Custom reminders in the dated release | Adds **Custom date and time** in `src/components/task/TaskEditor.tsx` and a small style rule. Validates future reminders at/before the task time, preserves exact seconds, displays the same lead-time adjustment used by the task service when rescheduling, and avoids re-arming unchanged fired reminders from an old editor. Updates documentation and rebuilds the installer. This is post-deadline functionality, UI, documentation and packaging work. |
+| 2026-10-05 UTC (requested 18:00 UTC) | Chat switch in the dated release | Adds a saved on/off switch in `src/app/App.tsx`, request/save busy coordination in `Composer.tsx`, and switch styles/tokens. Disabling chat hides the composer, discards unsaved chat state and unloads a loaded local model; re-enabling focuses the input without loading it. Manual task controls and reminders remain available. Updates README/release evidence and rebuilds the installer. This is post-deadline functionality, UI, documentation and packaging work. |
+| 2026-10-05 UTC (began 17:40 UTC) | Original logo, darker palettes and dated release | Reuses the author's original SVG symbol in `src/assets/`, the app header, favicon and generated Windows icons. Darkens Forest and Autumn in `src/styles/tokens.css`. Rebuilds and installs the updated app, adds dated synthetic theme screenshots, updates logo attribution and release documentation, and publishes new installer/portable assets under `desktop-update-2026-10-05`. Functionality, design, packaging, documentation and demo assets changed after the deadline. Application version metadata remains `0.1.0`; the dated tag distinguishes this build. |
+| 2026-10-05 UTC (recorded 17:29 UTC) | Theme and UI update in the dated release | Adds Cyberpunk, Dark Grey, Full Black, Forest, Bubblegum and Autumn in `src/styles/tokens.css` and `src/state/preferences.ts`; replaces the theme dropdown with accessible palette previews in Settings. Refines task controls, sticky filters, native light/dark controls, focus indicators, completed-task readability and the pinned composer; adjusts initial timeline scrolling for the sticky filters. These are post-deadline functionality/design changes. |
+| 2026-10-05 16:46 UTC | Notification troubleshooting in the dated release | Adds **Settings → Test notification** using the same native plugin as reminders, documents Windows installed-app registration, and rebuilds/installs the local NSIS installer. The old standalone launcher was removed and replaced by a shortcut to the installed app. Windows reports notifications enabled and accepted a diagnostic toast under the registered Taskflow identity; the database hash was unchanged immediately after installation and all 32 runtime files matched. Typecheck, 32 existing checks, Rust check and Windows build passed. Actual banner visibility and the app's Settings test button still require visual confirmation. |
 
 Pre-deadline source milestones: [`e1517d0`](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/commit/e1517d01063e4a0c68014729f3d62d0ac81ca5f8) records the initial desktop snapshot; [`ca56052`](https://github.com/S-Srinivasan-06/hacktoberfest-weekend-2026-10-01/commit/ca56052fb236aa326c5a4dee022bb506e05f27fa) records the feature update and both code-review passes. The `v0.1.0` tag also includes the expanded documentation and release evidence.
 
