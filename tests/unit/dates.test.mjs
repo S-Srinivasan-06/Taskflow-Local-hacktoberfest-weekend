@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
-import { localIsoToUtc, normalizeUtcDateTime, toLocalIsoWithoutOffset } from '../src/domain/dates.ts';
+import { localIsoToUtc, normalizeUtcDateTime, toLocalIsoWithoutOffset } from '../../src/domain/dates.ts';
 
 test('UTC dates are stored in one sortable format', () => {
   assert.equal(normalizeUtcDateTime('2026-10-04T12:00:00Z'), '2026-10-04T12:00:00.000Z');
@@ -33,7 +33,7 @@ test('rejects local calendar overflow and non-local date formats', () => {
 });
 
 test('conversion uses local timezone and rejects a daylight-saving gap', () => {
-  const moduleUrl = new URL('../src/domain/dates.ts', import.meta.url).href;
+  const moduleUrl = new URL('../../src/domain/dates.ts', import.meta.url).href;
   const cases = [
     ['Asia/Kolkata', `assert.equal(localIsoToUtc('2026-10-04T09:00:00'), '2026-10-04T03:30:00.000Z');`],
     ['America/New_York', `

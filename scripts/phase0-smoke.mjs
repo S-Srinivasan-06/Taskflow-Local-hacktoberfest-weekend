@@ -13,7 +13,7 @@ if (!['127.0.0.1', 'localhost', '::1'].includes(serverUrl.hostname)) {
 }
 const baseUrl = serverUrl.origin;
 const modelName = process.env.TASKFLOW_LLAMASERVER_MODEL ?? 'taskflow-local';
-const reportPath = resolve(dirname(fileURLToPath(import.meta.url)), 'artifacts/phase0-results.json');
+const reportPath = resolve(dirname(fileURLToPath(import.meta.url)), '../tests/artifacts/phase0-results.json');
 
 function fail(condition, message) {
   if (!condition) throw new Error(message);

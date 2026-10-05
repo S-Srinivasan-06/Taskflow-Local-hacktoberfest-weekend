@@ -6,6 +6,6 @@ export async function localFetch(url: string, options: RequestInit = {}): Promis
     throw new Error('Only local model connections are allowed.');
   }
   // The existing browser fixture mocks HTTP; it is excluded from production.
-  if (import.meta.env.DEV && location.pathname === '/tests/desktop.html') return fetch(url, options);
+  if (import.meta.env.DEV && location.pathname === '/tests/browser/desktop.html') return fetch(url, options);
   return nativeFetch(url, { ...options, maxRedirections: 0 });
 }

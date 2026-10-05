@@ -11,7 +11,7 @@ const browser = browsers.find(existsSync);
 if (!browser) throw new Error('An existing Chrome or Edge installation is required for this Windows UI check');
 
 try {
-  const response = await fetch('http://127.0.0.1:1420/tests/desktop.html');
+  const response = await fetch('http://127.0.0.1:1420/tests/browser/desktop.html');
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
 } catch {
   throw new Error('Start npm run dev before running npm run test:ui');
@@ -45,7 +45,7 @@ for (const [name, query] of [['manual', 'smoke'], ['empty', 'smoke&empty'], ['re
       '--disable-extensions', '--disable-sync', '--no-first-run', '--no-default-browser-check',
       '--window-size=620,760', '--virtual-time-budget=15000', `--user-data-dir=${profile}`,
       `--screenshot=${join(artifacts, `${name}.png`)}`, '--dump-dom',
-      `http://127.0.0.1:1420/tests/desktop.html?${query}`,
+      `http://127.0.0.1:1420/tests/browser/desktop.html?${query}`,
     ]);
     const report = output.match(/<output id="browser-check"[^>]*data-result="(pass|fail)"[^>]*>([\s\S]*?)<\/output>/);
     if (!report || report[1] !== 'pass') throw new Error(`${name}: ${report?.[2] ?? 'The browser produced no test result'}`);

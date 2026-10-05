@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { reminderQueue } from '../src/domain/reminders.ts';
-import { filterTasks } from '../src/domain/taskFilters.ts';
-import { buildActionJsonSchema } from '../src/model/actionSchema.ts';
-import { llamaPayload, ollamaPayload } from '../src/model/requestPayload.ts';
+import { reminderQueue } from '../../src/domain/reminders.ts';
+import { filterTasks } from '../../src/domain/taskFilters.ts';
+import { buildActionJsonSchema } from '../../src/model/actionSchema.ts';
+import { llamaPayload, ollamaPayload } from '../../src/model/requestPayload.ts';
 
 const now = new Date('2026-10-04T12:00:00Z');
 const task = (id, overrides = {}) => ({ id, title: id, scheduledAtUtc: '2026-10-04T13:00:00Z',

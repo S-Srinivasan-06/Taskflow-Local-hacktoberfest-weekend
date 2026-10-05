@@ -4,9 +4,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import test from 'node:test';
-import { configureDatabase, getDb } from '../src/db/database.ts';
-import { getTaskById, listTimelineTasks, queryTasks } from '../src/db/taskRepository.ts';
-import { executeTaskCommand } from '../src/domain/taskService.ts';
+import { configureDatabase, getDb } from '../../src/db/database.ts';
+import { getTaskById, listTimelineTasks, queryTasks } from '../../src/db/taskRepository.ts';
+import { executeTaskCommand } from '../../src/domain/taskService.ts';
 
 function connect(sqlite) {
   return {

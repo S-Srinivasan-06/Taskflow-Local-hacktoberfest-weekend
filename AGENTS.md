@@ -51,6 +51,7 @@ TypeScript owns almost all logic. Rust stays thin and only does:
 ```
 src/
   app/            App.tsx, bootstrap.ts
+  assets/         Original logo and application symbol
   components/     timeline/, composer/, task/, common/
   db/             database.ts, taskRepository.ts
   domain/         task.ts, actions.ts, taskService.ts
@@ -61,6 +62,12 @@ src/
 src-tauri/
   src/            lib.rs, model_process.rs
   runtime/llama/  taskflow-llama.exe + every DLL from the tested build
+tests/
+  unit/           Automated date, domain, persistence and model-contract tests
+  browser/        Mocked desktop page, fixtures and browser assertions
+  artifacts/      Local check output; ignored by Git
+scripts/          Browser runner and human-run model smoke checks
+docs/             Usage, development, challenge notes, releases and evidence
 ```
 
 Do not create folders for things that do not exist yet.

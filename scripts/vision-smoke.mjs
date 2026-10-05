@@ -3,7 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { createModelService } from '../src/model/modelService.ts';
 import { llamaPayload } from '../src/model/requestPayload.ts';
 
-const image = `data:image/png;base64,${(await readFile('tests/artifacts/vision-card.png')).toString('base64')}`;
+const image = `data:image/png;base64,${(await readFile('docs/screenshots/vision-input.png')).toString('base64')}`;
 const service = createModelService({ client: { async complete(request) {
   const response = await fetch('http://127.0.0.1:39281/v1/chat/completions', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(llamaPayload(request)),

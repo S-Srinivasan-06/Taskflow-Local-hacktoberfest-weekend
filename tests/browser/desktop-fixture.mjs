@@ -1,8 +1,8 @@
-// Dev-only browser fixture. No disk writes, localStorage, server, or real model.
+// Dev-only browser fixture: synthetic tasks, mocked IPC/model calls and isolated browser preferences.
 // Real SQLite behavior is checked separately in tasks.test.mjs.
 import { mockIPC } from '@tauri-apps/api/mocks';
-import { toLocalIsoWithoutOffset } from '../src/domain/dates.ts';
-import { MODEL_FILENAME, MODEL_PROJECTOR_FILENAME } from '../src/model/modelConfig.ts';
+import { toLocalIsoWithoutOffset } from '../../src/domain/dates.ts';
+import { MODEL_FILENAME, MODEL_PROJECTOR_FILENAME } from '../../src/model/modelConfig.ts';
 
 if (!import.meta.env.DEV) throw new Error('This fixture runs only in development');
 globalThis.isTauri = true;
@@ -117,7 +117,7 @@ mockIPC((command, args) => {
   throw new Error('Unexpected fixture query');
 });
 
-await import('../src/main.tsx');
+await import('../../src/main.tsx');
 
 if (parameters.has('smoke')) {
   const { runSmoke } = await import('./browser-smoke.mjs');

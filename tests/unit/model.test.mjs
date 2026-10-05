@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { localIsoToUtc } from '../src/domain/dates.ts';
-import { buildActionSchema, buildActionJsonSchema } from '../src/model/actionSchema.ts';
-import { buildContext, dateTable } from '../src/model/context.ts';
-import { buildPrompt } from '../src/model/prompt.ts';
-import { createModelService, SAFE_INTERPRETATION_ERROR } from '../src/model/modelService.ts';
+import { localIsoToUtc } from '../../src/domain/dates.ts';
+import { buildActionSchema, buildActionJsonSchema } from '../../src/model/actionSchema.ts';
+import { buildContext, dateTable } from '../../src/model/context.ts';
+import { buildPrompt } from '../../src/model/prompt.ts';
+import { createModelService, SAFE_INTERPRETATION_ERROR } from '../../src/model/modelService.ts';
 
 const now = new Date('2026-10-04T12:00:00');
 function task(index, title = `Task ${index}`) {

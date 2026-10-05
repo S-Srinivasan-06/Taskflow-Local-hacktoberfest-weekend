@@ -1,5 +1,6 @@
-import { toLocalIsoWithoutOffset } from '../src/domain/dates.ts';
-import { MODEL_FILENAME, MODEL_PROJECTOR_FILENAME } from '../src/model/modelConfig.ts';
+import { toLocalIsoWithoutOffset } from '../../src/domain/dates.ts';
+import { MODEL_FILENAME, MODEL_PROJECTOR_FILENAME } from '../../src/model/modelConfig.ts';
+import { THEMES } from '../../src/state/preferences.ts';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -75,7 +76,7 @@ export async function runSmoke(browserErrors) {
       assert(next.querySelector('h3').textContent === 'Gym', 'NEXT should skip completed future tasks');
       assert(marker.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING, 'Future tasks should follow NOW');
       checks.push('timeline order and next task');
-      const timeline = document.querySelector('.timeline');
+      const timeline = document.querySelector('.task-workspace');
       timeline.scrollTop = 0;
       click('Read', next);
       await waitFor(() => row('Gym')?.querySelector('h3').dataset.read === 'true', 'The seeded task did not update');
@@ -104,16 +105,18 @@ export async function runSmoke(browserErrors) {
     checks.push('local keyboard shortcuts');
 
     click('Settings');
+    const modelGroup = await waitFor(() => document.querySelector('.settings details'), 'Model settings did not open');
+    if (!modelGroup.open) modelGroup.querySelector('summary').click();
     const modelSelector = await waitFor(() => document.querySelector('#local-model:not(:disabled)'), 'Model list did not load');
     assert(![...modelSelector.options].some(option => option.value.includes('fixture:cloud')), 'Cloud model was offered');
-    for (const scheme of ['classic', 'slate', 'nord', 'dracula', 'solarized']) {
-      changeValue(document.getElementById('theme'), scheme);
+    for (const scheme of THEMES) {
+      document.querySelector(`input[name="theme"][value="${scheme}"]`).click();
       await waitFor(() => document.documentElement.dataset.theme === scheme, 'Theme did not change');
       const styles = getComputedStyle(document.body);
       assert(styles.color !== styles.backgroundColor, 'Theme hides text against its background');
       assert(localStorage.getItem('taskflow.theme') === scheme, 'Theme preference did not persist');
     }
-    changeValue(document.getElementById('theme'), 'classic');
+    document.querySelector('input[name="theme"][value="classic"]').click();
     changeValue(modelSelector, 'ollama|fixture-local:latest');
     await waitFor(() => document.querySelector('#local-model:not(:disabled)')?.value === 'ollama|fixture-local:latest', 'Ollama selection did not apply');
     const requestControl = document.getElementById('task-request');
@@ -127,7 +130,7 @@ export async function runSmoke(browserErrors) {
     changeValue(document.getElementById('image-projector'), MODEL_PROJECTOR_FILENAME);
     await waitFor(() => document.querySelector('#image-projector:not(:disabled)')?.value === MODEL_PROJECTOR_FILENAME, 'Image projector selection failed');
     click('Close', document.querySelector('.settings'));
-    checks.push('five persisted themes and local model selection with Ollama approval');
+    checks.push('eleven persisted themes and local model selection with Ollama approval');
 
     const requestInput = document.getElementById('task-request');
     assert(requestInput instanceof HTMLInputElement, 'Local request input is missing');
